@@ -212,6 +212,6 @@ if __name__ == "__main__":
     
     # Only proceed with visualization if we have results
     if results_df is not None:
-        symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ']
+        symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN']
         visualize_sentiment_analysis(results_df, symbols)
         analyze_sentiment_impact()
