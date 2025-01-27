@@ -1,3 +1,5 @@
+# DeepTrade
+
 ### Advanced Sentiment Analysis Pipeline
 
 The system employs a sophisticated multi-source sentiment analysis approach:
