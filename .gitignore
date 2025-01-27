@@ -69,3 +69,4 @@ StockManager
 
 # Keep gitkeep files
 !.gitkeep
+models/finbert/
