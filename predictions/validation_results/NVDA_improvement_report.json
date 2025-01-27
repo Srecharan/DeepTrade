@@ -1,0 +1,189 @@
+{
+    "timestamp": "2024-12-27T15:12:08.419643",
+    "symbol": "NVDA",
+    "analysis": {
+        "5min": {
+            "metrics": {
+                "sample_size": 22,
+                "mean_absolute_error": 0.21658229672366122,
+                "median_error": 0.1293642507390372,
+                "max_error": 1.6412921324513552,
+                "direction_accuracy": 54.54545454545454,
+                "ci_coverage": 63.63636363636363,
+                "error_std": 0.3319256201355141
+            },
+            "issues": [
+                {
+                    "type": "poor_direction",
+                    "severity": "high",
+                    "details": "Low direction accuracy: 54.5%"
+                },
+                {
+                    "type": "confidence_interval",
+                    "severity": "medium",
+                    "details": "Low confidence interval coverage: 63.6%"
+                }
+            ],
+            "improvements": [
+                {
+                    "area": "features",
+                    "suggestion": "Add momentum indicators",
+                    "implementation": "Add RSI, MACD variations to technical_indicators"
+                },
+                {
+                    "area": "features",
+                    "suggestion": "Include shorter-term indicators",
+                    "implementation": "Add 1-min and 5-min technical indicators"
+                },
+                {
+                    "area": "confidence",
+                    "suggestion": "Adjust confidence calculation",
+                    "implementation": "Modify calculate_confidence_score in prediction_system.py"
+                },
+                {
+                    "area": "volatility",
+                    "suggestion": "Include market volatility in confidence estimation",
+                    "implementation": "Add VIX-based adjustments to confidence calculation"
+                }
+            ]
+        },
+        "15min": {
+            "metrics": {
+                "sample_size": 18,
+                "mean_absolute_error": 0.21091889057346913,
+                "median_error": 0.09221300451224364,
+                "max_error": 1.0962745405866359,
+                "direction_accuracy": 55.55555555555556,
+                "ci_coverage": 88.88888888888889,
+                "error_std": 0.2584573732032133
+            },
+            "issues": [
+                {
+                    "type": "poor_direction",
+                    "severity": "high",
+                    "details": "Low direction accuracy: 55.6%"
+                },
+                {
+                    "type": "confidence_interval",
+                    "severity": "medium",
+                    "details": "Low confidence interval coverage: 88.9%"
+                }
+            ],
+            "improvements": [
+                {
+                    "area": "features",
+                    "suggestion": "Add momentum indicators",
+                    "implementation": "Add RSI, MACD variations to technical_indicators"
+                },
+                {
+                    "area": "features",
+                    "suggestion": "Include shorter-term indicators",
+                    "implementation": "Add 1-min and 5-min technical indicators"
+                },
+                {
+                    "area": "confidence",
+                    "suggestion": "Adjust confidence calculation",
+                    "implementation": "Modify calculate_confidence_score in prediction_system.py"
+                },
+                {
+                    "area": "volatility",
+                    "suggestion": "Include market volatility in confidence estimation",
+                    "implementation": "Add VIX-based adjustments to confidence calculation"
+                }
+            ]
+        },
+        "30min": {
+            "metrics": {
+                "sample_size": 13,
+                "mean_absolute_error": 0.18647731225568148,
+                "median_error": 0.09923074383455745,
+                "max_error": 0.9295453991801168,
+                "direction_accuracy": 53.84615384615385,
+                "ci_coverage": 92.3076923076923,
+                "error_std": 0.23767194265373806
+            },
+            "issues": [
+                {
+                    "type": "poor_direction",
+                    "severity": "high",
+                    "details": "Low direction accuracy: 53.8%"
+                }
+            ],
+            "improvements": [
+                {
+                    "area": "features",
+                    "suggestion": "Add momentum indicators",
+                    "implementation": "Add RSI, MACD variations to technical_indicators"
+                },
+                {
+                    "area": "features",
+                    "suggestion": "Include shorter-term indicators",
+                    "implementation": "Add 1-min and 5-min technical indicators"
+                }
+            ]
+        },
+        "1h": {
+            "metrics": {
+                "sample_size": 5,
+                "mean_absolute_error": 0.3613655991478998,
+                "median_error": 0.3769409299688021,
+                "max_error": 0.686395728449178,
+                "direction_accuracy": 60.0,
+                "ci_coverage": 80.0,
+                "error_std": 0.21331737050020153
+            },
+            "issues": [
+                {
+                    "type": "confidence_interval",
+                    "severity": "medium",
+                    "details": "Low confidence interval coverage: 80.0%"
+                }
+            ],
+            "improvements": [
+                {
+                    "area": "confidence",
+                    "suggestion": "Adjust confidence calculation",
+                    "implementation": "Modify calculate_confidence_score in prediction_system.py"
+                },
+                {
+                    "area": "volatility",
+                    "suggestion": "Include market volatility in confidence estimation",
+                    "implementation": "Add VIX-based adjustments to confidence calculation"
+                }
+            ]
+        }
+    },
+    "recommendations": [
+        {
+            "priority": "High",
+            "area": "Direction Prediction",
+            "affected_timeframes": [
+                "5min",
+                "15min",
+                "30min"
+            ],
+            "suggestion": "Enhance directional accuracy",
+            "implementation": [
+                "Add trend strength indicators",
+                "Include market sentiment analysis",
+                "Implement momentum-based features"
+            ]
+        },
+        {
+            "priority": "Medium",
+            "area": "Confidence Estimation",
+            "affected_timeframes": [
+                "5min",
+                "15min",
+                "1h"
+            ],
+            "suggestion": "Improve confidence intervals",
+            "implementation": [
+                "Incorporate market volatility into CI calculation",
+                "Add dynamic adjustments based on time of day",
+                "Implement market regime detection",
+                "Consider VIX-based scaling factors"
+            ]
+        }
+    ]
+}

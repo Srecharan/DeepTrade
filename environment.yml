@@ -1,0 +1,29 @@
+name: stock_pred
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cudatoolkit=11.3
+  - transformers
+  - xgboost
+  - pytz
+  - requests
+  - tabulate
+  - pip:
+    - yfinance
+    - praw
+    - finnhub-python
+    - alpha_vantage
+    - textblob
+    - python-dotenv

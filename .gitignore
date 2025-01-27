@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
+*.log
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+models/trained/*
+!models/trained/.gitkeep
+
+# Config and sensitive files
+utils/config.py
+utils/config/__pycache__/
+config.json
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Additional data
+data/sentiment/*
+!data/sentiment/.gitkeep
+*.csv
+*.npy
+*.pkl
+
+# Logs and reports
+*.log
+model_trainer_report
+StockManager
+
+# Keep gitkeep files
+!.gitkeep

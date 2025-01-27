@@ -1,0 +1,18 @@
+{
+    "lstm": {
+        "hidden_size": 256,
+        "num_layers": 2,
+        "learning_rate": 0.0005,
+        "batch_size": 32,
+        "epochs": 200,
+        "sequence_length": 30
+    },
+    "xgboost": {
+        "max_depth": 6,
+        "learning_rate": 0.01,
+        "n_estimators": 200,
+        "min_child_weight": 3,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8
+    }
+}
