@@ -118,6 +118,71 @@ The metrics represent Mean Absolute Error (MAE) on normalized returns. Model tra
 ![Sentiment Analysis](visualization/sentiment_analysis.png)
 *Sentiment analysis across different sources and stocks*
 
+
+3. Automated Trading System
+Live Trading Architecture
+The system employs a sophisticated paper trading implementation through Tradier's sandbox API, enabling real-time market simulation and automated execution.
+
+Real-time Execution:
+
+Market hours trading (9:30 AM - 4:00 PM ET)
+Real-time order execution and tracking
+Live position monitoring
+Automated P&L calculation
+
+
+
+Risk Management Framework
+
+Position Controls:
+
+Maximum 2 concurrent positions
+2% capital allocation per trade
+1.5% stop loss implementation
+3% take profit targets
+5-180 minutes holding time limits
+
+
+Market Risk Management:
+
+Real-time price monitoring
+Automated stop loss/take profit
+Dynamic position sizing
+Market hours only trading
+Minimum time between trades: 60 minutes
+
+
+
+Trading Strategy Implementation
+
+Entry Logic:
+
+Multi-timeframe trend analysis
+Volume profile validation
+Support/Resistance levels
+Real-time sentiment integration
+Minimum 90% confidence threshold
+
+
+Exit Conditions:
+
+Price-based exits (stop/target)
+Time-based exits (max hold time)
+Trailing stop implementation
+Market condition filters
+
+
+
+Performance Summary
+Trading Metrics (January 2025):
+- Initial Capital : $100,000.00
+- Final Capital  : $100,204.98
+- Net P&L       : $204.98 
+- Return        : 0.20%
+- Total Trades  : 2
+- Win Rate      : 50.0%
+- Avg Hold Time : ~180 minutes
+
 ## Installation & Usage
 
 ### 1. Environment Setup
