@@ -116,9 +116,6 @@ The metrics represent Mean Absolute Error (MAE) on normalized returns. Model tra
   - Failure recovery mechanisms
 
 ![Sentiment Analysis](visualization/sentiment_analysis.png)
-*Multi-source sentiment analysis showing source-specific scores and aggregated metrics*
-
-![Sentiment Analysis](visualization/sentiment_analysis.png)
 *Sentiment analysis across different sources and stocks*
 
 ## Installation & Usage
