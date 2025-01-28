@@ -201,7 +201,13 @@ conda activate stock_pred
 pip install -r requirements.txt
 ```
 
-### 2. Configuration
+### 2. Configuration & API Setup
+Before running the system, you'll need to set up accounts and obtain API keys from:
+- Tradier (for paper trading)
+- NewsAPI (for financial news)
+- Reddit API (for sentiment analysis)
+
+A template configuration file is provided at `utils/config.template.py`. Copy this to `config.py` and fill in your API credentials:
 ```python
 # In utils/config.py
 NEWS_API_KEY = "your_key"
@@ -210,13 +216,42 @@ REDDIT_CLIENT_SECRET = "your_secret"
 TRADIER_TOKEN = "your_token"
 ```
 
-### 3. Stock Selection
-Define symbols in your prediction script:
-```python
-symbols = ['AAPL', 'NVDA', 'MSFT', 'AMD', 'GME', 'JNJ']
-predictor = PredictionSystem()
-predictions = predictor.predict_timeframe(symbol='AAPL', timeframe='15min')
+### 3. Running the System
+The following commands demonstrate the core functionality:
+
+```bash
+# Multi-timeframe predictions (5min, 15min, 30min, 1hr)
+python tests/integration/test_integrated_predictions.py
+
+# Paper trading simulation
+python tests/unit/test_paper_trading.py --mode tradier
+
+# Sentiment analysis
+python tests/unit/test_sentiment.py
+
+# Validation collection during market hours
+python tests/unit/test_validation_collector.py
 ```
+
+### 4. Stock Selection & Training
+The repository comes pre-trained with nine major stocks:
+- AAPL (Apple)
+- MSFT (Microsoft)
+- AMD (Advanced Micro Devices)
+- GME (GameStop)
+- NVDA (NVIDIA)
+- JNJ (Johnson & Johnson)
+- META (Meta)
+- GOOGL (Google)
+- AMZN (Amazon)
+
+To add new stocks for prediction and trading:
+1. Add the stock symbol to the `symbols` list in `test_model_training.py`
+2. Run the training:
+```bash
+python tests/unit/test_model_training.py
+```
+3. Once trained, the new stock can be used for predictions, sentiment analysis, and trading
 
 ## Performance Metrics
 
