@@ -2166,8 +2166,8 @@
             151.09309609431352
         ],
         "target_time": "2025-01-28T13:07:12.784813-05:00",
-        "actual_price": null,
-        "validated": false
+        "actual_price": 151.3000030517578,
+        "validated": true
     },
     {
         "timestamp": "2025-01-28T12:37:12.784813-05:00",
@@ -2208,8 +2208,8 @@
             151.27711651463997
         ],
         "target_time": "2025-01-28T13:00:32.411004-05:00",
-        "actual_price": null,
-        "validated": false
+        "actual_price": 151.35000610351562,
+        "validated": true
     },
     {
         "timestamp": "2025-01-28T12:45:32.411004-05:00",
@@ -2222,8 +2222,8 @@
             151.30233974494442
         ],
         "target_time": "2025-01-28T13:15:32.411004-05:00",
-        "actual_price": null,
-        "validated": false
+        "actual_price": 151.2100067138672,
+        "validated": true
     },
     {
         "timestamp": "2025-01-28T12:45:32.411004-05:00",
@@ -2264,8 +2264,8 @@
             151.37776061240334
         ],
         "target_time": "2025-01-28T13:05:42.121840-05:00",
-        "actual_price": null,
-        "validated": false
+        "actual_price": 151.32000732421875,
+        "validated": true
     },
     {
         "timestamp": "2025-01-28T12:50:42.121840-05:00",
@@ -2278,8 +2278,8 @@
             151.33870358031825
         ],
         "target_time": "2025-01-28T13:20:42.121840-05:00",
-        "actual_price": null,
-        "validated": false
+        "actual_price": 151.23129272460938,
+        "validated": true
     },
     {
         "timestamp": "2025-01-28T12:50:42.121840-05:00",
@@ -2306,8 +2306,8 @@
             151.30535642788732
         ],
         "target_time": "2025-01-28T13:00:53.561891-05:00",
-        "actual_price": null,
-        "validated": false
+        "actual_price": 151.35000610351562,
+        "validated": true
     },
     {
         "timestamp": "2025-01-28T12:55:53.561891-05:00",
@@ -2320,8 +2320,8 @@
             151.3179184061624
         ],
         "target_time": "2025-01-28T13:10:53.561891-05:00",
-        "actual_price": null,
-        "validated": false
+        "actual_price": 151.2100067138672,
+        "validated": true
     },
     {
         "timestamp": "2025-01-28T12:55:53.561891-05:00",
@@ -2334,8 +2334,8 @@
             151.30056357911388
         ],
         "target_time": "2025-01-28T13:25:53.561891-05:00",
-        "actual_price": null,
-        "validated": false
+        "actual_price": 151.08999633789062,
+        "validated": true
     },
     {
         "timestamp": "2025-01-28T12:55:53.561891-05:00",
@@ -2348,6 +2348,230 @@
             151.27334336758634
         ],
         "target_time": "2025-01-28T13:55:53.561891-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:01:08.563235-05:00",
+        "timeframe": "5min",
+        "current_price": 151.355,
+        "predicted_price": 151.35003460566148,
+        "confidence": 0.9314247082563911,
+        "confidence_interval": [
+            151.34900253395455,
+            151.3510666773684
+        ],
+        "target_time": "2025-01-28T13:06:08.563235-05:00",
+        "actual_price": 151.32000732421875,
+        "validated": true
+    },
+    {
+        "timestamp": "2025-01-28T13:01:08.563235-05:00",
+        "timeframe": "15min",
+        "current_price": 151.355,
+        "predicted_price": 151.44011735306088,
+        "confidence": 0.9313495074337149,
+        "confidence_interval": [
+            151.40500408864477,
+            151.475230617477
+        ],
+        "target_time": "2025-01-28T13:16:08.563235-05:00",
+        "actual_price": 151.2100067138672,
+        "validated": true
+    },
+    {
+        "timestamp": "2025-01-28T13:01:08.563235-05:00",
+        "timeframe": "30min",
+        "current_price": 151.355,
+        "predicted_price": 151.3384707902127,
+        "confidence": 0.9314030283265571,
+        "confidence_interval": [
+            151.32244470133358,
+            151.35449687909184
+        ],
+        "target_time": "2025-01-28T13:31:08.563235-05:00",
+        "actual_price": 151.17999267578125,
+        "validated": true
+    },
+    {
+        "timestamp": "2025-01-28T13:01:08.563235-05:00",
+        "timeframe": "1h",
+        "current_price": 151.355,
+        "predicted_price": 151.4398627641185,
+        "confidence": 0.9313738170992312,
+        "confidence_interval": [
+            151.39130825930664,
+            151.48841726893033
+        ],
+        "target_time": "2025-01-28T14:01:08.563235-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:06:18.652605-05:00",
+        "timeframe": "5min",
+        "current_price": 151.3,
+        "predicted_price": 151.29924700083168,
+        "confidence": 0.9313628756262442,
+        "confidence_interval": [
+            151.2824932946594,
+            151.31600070700398
+        ],
+        "target_time": "2025-01-28T13:11:18.652605-05:00",
+        "actual_price": 151.2100067138672,
+        "validated": true
+    },
+    {
+        "timestamp": "2025-01-28T13:06:18.652605-05:00",
+        "timeframe": "15min",
+        "current_price": 151.3,
+        "predicted_price": 151.28333771307655,
+        "confidence": 0.9313910841409099,
+        "confidence_interval": [
+            151.26675764444428,
+            151.2999177817088
+        ],
+        "target_time": "2025-01-28T13:21:18.652605-05:00",
+        "actual_price": 151.23129272460938,
+        "validated": true
+    },
+    {
+        "timestamp": "2025-01-28T13:06:18.652605-05:00",
+        "timeframe": "30min",
+        "current_price": 151.3,
+        "predicted_price": 151.27218821044127,
+        "confidence": 0.9314242762136218,
+        "confidence_interval": [
+            151.26939412032218,
+            151.27498230056037
+        ],
+        "target_time": "2025-01-28T13:36:18.652605-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:06:18.652605-05:00",
+        "timeframe": "1h",
+        "current_price": 151.3,
+        "predicted_price": 151.4022071195642,
+        "confidence": 0.9312596421142818,
+        "confidence_interval": [
+            151.25274848741003,
+            151.55166575171836
+        ],
+        "target_time": "2025-01-28T14:06:18.652605-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:21:04.786207-05:00",
+        "timeframe": "5min",
+        "current_price": 152.88999938964844,
+        "predicted_price": 152.953239569021,
+        "confidence": 0.9309948502266616,
+        "confidence_interval": [
+            152.84098643191732,
+            153.0654927061247
+        ],
+        "target_time": "2025-01-28T13:26:04.786207-05:00",
+        "actual_price": 151.08999633789062,
+        "validated": true
+    },
+    {
+        "timestamp": "2025-01-28T13:21:04.786207-05:00",
+        "timeframe": "15min",
+        "current_price": 152.88999938964844,
+        "predicted_price": 152.8809606256504,
+        "confidence": 0.9314202469074621,
+        "confidence_interval": [
+            152.87717043323048,
+            152.88475081807033
+        ],
+        "target_time": "2025-01-28T13:36:04.786207-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:21:04.786207-05:00",
+        "timeframe": "30min",
+        "current_price": 152.88999938964844,
+        "predicted_price": 152.86041098167274,
+        "confidence": 0.9314029726343349,
+        "confidence_interval": [
+            152.84419628756726,
+            152.87662567577823
+        ],
+        "target_time": "2025-01-28T13:51:04.786207-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:21:04.786207-05:00",
+        "timeframe": "1h",
+        "current_price": 152.88999938964844,
+        "predicted_price": 152.79434402834366,
+        "confidence": 0.9313396776695444,
+        "confidence_interval": [
+            152.7152790871566,
+            152.87340896953071
+        ],
+        "target_time": "2025-01-28T14:21:04.786207-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:35:35.102079-05:00",
+        "timeframe": "5min",
+        "current_price": 151.2402,
+        "predicted_price": 151.29353973832994,
+        "confidence": 0.931262439767299,
+        "confidence_interval": [
+            151.25101202203479,
+            151.3360674546251
+        ],
+        "target_time": "2025-01-28T13:40:35.102079-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:35:35.102079-05:00",
+        "timeframe": "15min",
+        "current_price": 151.2402,
+        "predicted_price": 151.24154597059186,
+        "confidence": 0.9313834547290507,
+        "confidence_interval": [
+            151.22159361281152,
+            151.2614983283722
+        ],
+        "target_time": "2025-01-28T13:50:35.102079-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:35:35.102079-05:00",
+        "timeframe": "30min",
+        "current_price": 151.2402,
+        "predicted_price": 151.27903261900263,
+        "confidence": 0.9314156431533068,
+        "confidence_interval": [
+            151.270846187145,
+            151.28721905086027
+        ],
+        "target_time": "2025-01-28T14:05:35.102079-05:00",
+        "actual_price": null,
+        "validated": false
+    },
+    {
+        "timestamp": "2025-01-28T13:35:35.102079-05:00",
+        "timeframe": "1h",
+        "current_price": 151.2402,
+        "predicted_price": 151.14435641323522,
+        "confidence": 0.9313715638525097,
+        "confidence_interval": [
+            151.09414041924347,
+            151.19457240722696
+        ],
+        "target_time": "2025-01-28T14:35:35.102079-05:00",
         "actual_price": null,
         "validated": false
     }

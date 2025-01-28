@@ -256,7 +256,7 @@ python tests/unit/test_model_training.py
 
 ## Performance Metrics
 
-- ### Price Prediction
+### Price Prediction
 - Directional Accuracy: 82.76% (1-hour timeframe)
 - Mean Absolute Error: 0.73% (5-min predictions)
 - Confidence Scoring: 87-93%
@@ -266,6 +266,7 @@ python tests/unit/test_model_training.py
 - 60+ Reddit posts per stock
 - Real-time SEC filing processing
 
+### Trading Performance
 [Performance metrics will be updated after completion of full trading day session - January 28, 2025]
 
 ## License & Attribution
@@ -278,3 +279,9 @@ This project is licensed under the MIT License. Special thanks to:
 
 ## Note
 The FinBERT model files will be downloaded automatically when running the sentiment analyzer for the first time.
+
+This project utilizes free tier API access for all integrations:
+- Tradier Sandbox API: Includes (10-15)-minute delayed market data
+- NewsAPI: Limited to 100 requests per day
+- Reddit API: Basic rate limits apply
+- Real-time price fetching may experience delays due to free tier limitations
