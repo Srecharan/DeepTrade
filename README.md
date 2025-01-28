@@ -1,152 +1,117 @@
 # DeepTrade AI: Multi-Model Stock Prediction with NLP & Automated Trading
 
 ![Python](https://img.shields.io/badge/python-v3.9-blue.svg)
-![Contributions welcome](https://img.shields.io/badge/contributions-welcome-orange.svg)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.0-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## Overview
+## System Architecture
 
-DeepTrade AI is a cutting-edge stock prediction and automated trading system that combines deep learning, advanced NLP, and real-time sentiment analysis. The system leverages state-of-the-art models including LSTM neural networks, XGBoost, and sophisticated ensemble methods to provide accurate market predictions while incorporating sentiment signals from multiple sources.
+DeepTrade AI combines three powerful components to provide comprehensive stock market analysis and trading:
 
-## Key Features
+1. **Advanced Stock Prediction Engine**: LSTM-XGBoost ensemble for multi-timeframe price predictions
+2. **Multi-Source Sentiment Analysis**: Real-time sentiment processing from news, Reddit, and SEC filings
+3. **Automated Trading System**: Paper trading simulation with Tradier integration
 
-### Stock Prediction Engine
-- **Multi-Model Architecture**
-  - LSTM Neural Networks with attention mechanism
-  - XGBoost for feature-based prediction
-  - Ensemble methods combining both models
-  - Dynamic confidence interval calculations
-- **Supported Stocks**
-  - Core Tech: AAPL, NVDA, MSFT
-  - Growth: AMD, GME
-  - Stable: JNJ
-- **Prediction Capabilities**
-  - Multiple timeframes (5min to 1h)
-  - Price direction and magnitude
-  - Confidence scores and risk metrics
+### Technical Stack
+- **Deep Learning**: PyTorch with CUDA acceleration
+- **Machine Learning**: XGBoost, Scikit-learn
+- **NLP**: FinBERT for financial text analysis
+- **APIs**: Tradier, News API, Reddit API
+- **Data Processing**: Pandas, NumPy, SciPy
+
+## 1. Stock Prediction System
+
+### Model Architecture
+The prediction system employs an ensemble approach combining:
+
+- **Enhanced LSTM Model**:
+  - Bidirectional LSTM with attention mechanism
+  - Multi-head attention for sequence processing
+  - Batch normalization and residual connections
+  - Dynamic dropout rates for optimal regularization
+
+- **XGBoost Model**:
+  - Gradient boosting for feature-based predictions
+  - Advanced feature engineering
+  - Dynamic weighting based on performance
 
 ![Stock Predictions](visualization/stock_prediction_collage.png)
-*Prediction results across multiple stocks*
+*Multi-timeframe predictions across different stocks showing price action and confidence intervals*
+
+### Training Process
+The model training pipeline includes:
+
+- **Feature Engineering**:
+  - 15 technical indicators (RSI, MACD, Bollinger Bands, etc.)
+  - 12 long-term trend indicators
+  - 12 sentiment-based features
+
+- **Training Strategy**:
+  - Time-series cross-validation
+  - Dynamic learning rate scheduling
+  - Early stopping with patience
+  - Model performance tracking
 
 ![Training History](visualization/stock_training_history_collage.png)
-*Model training convergence and validation*
+*Training convergence showing loss metrics and validation performance*
 
-### Advanced Sentiment Analysis Pipeline
+## 2. Sentiment Analysis Pipeline
 
-The system employs a sophisticated multi-source sentiment analysis approach:
+### Multi-Source Integration
+- **Financial News Processing**: Real-time analysis of market news (40%)
+- **Reddit Sentiment**: Analysis of market-related subreddits (30%)
+- **SEC Filing Analysis**: Automated processing of financial documents (30%)
 
-- **FinBERT Model Integration**: Leverages fine-tuned BERT architecture for financial text analysis
-- **Multi-Source Data Fusion**: 
-  - Financial News (40%)
-  - Reddit Market Sentiment (30%)
-  - SEC Filing Analysis (30%)
-- **Real-time Processing**: Streaming architecture with intelligent caching
-- **Feature Engineering**: Advanced NLP techniques including sentiment momentum indicators and volume-weighted signals
+### Sentiment Processing
+- FinBERT model fine-tuned for financial text
+- Real-time sentiment scoring and aggregation
+- Advanced feature engineering:
+  - Sentiment momentum indicators
+  - Volume-weighted sentiment signals
+  - Trend strength analysis
 
-### Sentiment Analysis Results
+![Sentiment Analysis](visualization/sentiment_analysis.png)
+*Sentiment analysis across different sources and stocks*
 
-![Sentiment Analysis Dashboard](visualization/sentiment_analysis.png)
+## Installation & Usage
 
-Our sentiment analysis pipeline processes:
-- 300+ daily news articles
-- 60+ Reddit posts
-- Real-time SEC filings
-- Coverage of major tech stocks (AAPL, NVDA, MSFT, GOOGL, etc.)
-- 87-93% prediction confidence scores
-
-### Stock Prediction Performance
-
-![Price Prediction Example](visualization/AAPL_prediction.png)
-
-The LSTM-XGBoost ensemble model demonstrates strong predictive capabilities:
-- High directional accuracy (82.76% for 1-hour timeframe)
-- Low mean absolute error (0.73% for 5-min predictions)
-- Robust confidence intervals for risk management
-
-### Model Training Metrics
-
-![Training History](visualization/AAPL_training_history.png)
-
-The training process shows consistent improvement:
-- Stable convergence in loss metrics
-- Effective regularization preventing overfitting
-- Strong validation performance
-
-## Technical Architecture
-
-### Model Components
-```
-DeepTrade/
-├── models/
-│   ├── finbert/          # FinBERT for sentiment analysis
-│   └── trained/          # Stock-specific prediction models
-│       ├── LSTM models
-│       └── XGBoost models
-├── data/
-│   ├── sentiment/        # Multi-source sentiment data
-│   └── market/          # Historical price & technical data
-└── utils/              # Core prediction & trading logic
-```
-
-### Core Features
-- **Sentiment Analysis**
-  - FinBERT-based text processing
-  - Multi-source sentiment fusion
-  - Real-time sentiment updates
-- **Price Prediction**
-  - LSTM with attention mechanism
-  - XGBoost for feature engineering
-  - Ensemble prediction system
-- **Automated Trading**
-  - Risk management system
-  - Paper trading integration
-  - Multi-timeframe analysis
-
-## Installation & Setup
-
-1. Clone the repository:
-```bash
-git clone https://github.com/Srecharan/DeepTrade.git
-cd DeepTrade
-```
-
-2. Install dependencies:
+### 1. Environment Setup
 ```bash
 conda env create -f environment.yml
 conda activate stock_pred
 pip install -r requirements.txt
 ```
 
-3. Configure API keys:
+### 2. Configuration
 ```python
 # In utils/config.py
 NEWS_API_KEY = "your_key"
 REDDIT_CLIENT_ID = "your_id"
 REDDIT_CLIENT_SECRET = "your_secret"
+TRADIER_TOKEN = "your_token"
 ```
 
-## Usage Examples
-
-### Running Predictions
+### 3. Stock Selection
+Define symbols in your prediction script:
 ```python
-from utils.prediction_system import PredictionSystem
-
+symbols = ['AAPL', 'NVDA', 'MSFT', 'AMD', 'GME', 'JNJ']
 predictor = PredictionSystem()
-predictions = predictor.predict('AAPL', timeframe='15min')
+predictions = predictor.predict_timeframe(symbol='AAPL', timeframe='15min')
 ```
 
-### Paper Trading Simulation
-```python
-from utils.paper_trading import PaperTradingSimulation
+## Performance Metrics
 
-simulator = PaperTradingSimulation(
-    symbols=['AAPL', 'NVDA'],
-    initial_capital=100000.0
-)
-results = simulator.run_simulation(duration_minutes=60)
-```
+- **Price Prediction**:
+  - Directional Accuracy: 82.76% (1-hour timeframe)
+  - Mean Absolute Error: 0.73% (5-min predictions)
+  - Confidence Scoring: 87-93%
 
-## License & Acknowledgments
+- **Sentiment Analysis**:
+  - Coverage: 300+ daily news articles
+  - 60+ Reddit posts per stock
+  - Real-time SEC filing processing
+
+## License & Attribution
 
 This project is licensed under the MIT License. Special thanks to:
 - ProsusAI for the FinBERT model
@@ -154,4 +119,4 @@ This project is licensed under the MIT License. Special thanks to:
 - NewsAPI for financial news access
 
 ## Note
-The FinBERT model files are not included in the repository due to size limitations. They will be downloaded automatically when running the sentiment analyzer for the first time.
+The FinBERT model files will be downloaded automatically when running the sentiment analyzer for the first time.
