@@ -50,6 +50,8 @@ utils/config.py
 utils/config/__pycache__/
 config.json
 
+visualization_collage.py
+
 # Test cache
 .pytest_cache/
 .coverage
