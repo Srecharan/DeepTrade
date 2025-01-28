@@ -118,58 +118,79 @@ The metrics represent Mean Absolute Error (MAE) on normalized returns. Model tra
 ![Sentiment Analysis](visualization/sentiment_analysis.png)
 *Sentiment analysis across different sources and stocks*
 
-
 ## 3. Automated Trading System
 
 ### Live Trading Architecture
-The system employs a sophisticated paper trading implementation through Tradier's sandbox API, enabling real-time market simulation and automated execution.
+The system employs a sophisticated paper trading implementation through Tradier's sandbox API, enabling real-time market simulation with a focus on intraday trading:
 
-- **Real-time Execution**:
-  - Market hours trading (9:30 AM - 4:00 PM ET)
-  - Real-time order execution and tracking
-  - Live position monitoring
-  - Automated P&L calculation
+```python
+# Core Configuration
+initial_capital = 100000.0
+timeframe = '15min'
+symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN']
+```
 
 ### Risk Management Framework
-- **Position Controls**:
-  - Maximum 2 concurrent positions
-  - 2% capital allocation per trade
-  - 1.5% stop loss implementation
-  - 3% take profit targets
-  - 5-180 minutes holding time limits
-
-- **Market Risk Management**:
-  - Real-time price monitoring
-  - Automated stop loss/take profit
-  - Dynamic position sizing
-  - Market hours only trading
-  - Minimum time between trades: 60 minutes
-
-### Trading Strategy Implementation
-- **Entry Logic**:
-  - Multi-timeframe trend analysis
-  - Volume profile validation
-  - Support/Resistance levels
-  - Real-time sentiment integration
-  - Minimum 90% confidence threshold
-
-- **Exit Conditions**:
-  - Price-based exits (stop/target)
-  - Time-based exits (max hold time)
-  - Trailing stop implementation
-  - Market condition filters
-
-### Performance Summary
+```python
+# Risk Controls
+max_positions = 2              # Maximum concurrent positions
+position_size = 0.02          # 2% capital per trade
+max_daily_risk = 0.02        # Maximum 2% account risk per day
+stop_loss_pct = 0.015        # 1.5% stop loss
+take_profit_pct = 0.03       # 3% take profit
+trailing_stop_pct = 0.005    # 0.5% trailing stop when profitable
 ```
-Trading Metrics (January 2025):
-- Initial Capital : $100,000.00
-- Final Capital  : $100,204.98
-- Net P&L       : $204.98 
-- Return        : 0.20%
-- Total Trades  : 2
-- Win Rate      : 50.0%
-- Avg Hold Time : ~180 minutes
+
+### Strategy Implementation
+```python
+# Signal Generation
+trend_composite = (
+    daily_score * 0.4 +     # Daily trend weight
+    hourly_score * 0.4 +    # Hourly trend weight
+    minute_score * 0.2      # Short-term momentum
+)
+
+entry_signals = {
+    'pullback': near_support and trend_composite > -0.5,
+    'breakout': near_resistance and trend_composite > -0.3,
+    'momentum': trend_composite > 0.3
+}
 ```
+
+### Trading Controls
+- Dynamic position sizing based on volatility
+- Maximum 3 trades per day
+- Position hold time: 5-180 minutes
+- Real-time sentiment integration
+- Multi-timeframe trend analysis
+- Volume profile validation (>80% 15min average)
+
+### Recent Performance (January 2025)
+```
+Trading Results:
+Initial Capital : $100,000.00
+Final Capital  : $100,204.98
+Net P&L       : $204.98 
+Return        : 0.20%
+Total Trades  : 2
+Win Rate      : 50.0%
+
+Recent Trades:
+Symbol   Entry     Exit      Shares  P&L($)   P&L(%)
+-------------------------------------------------------
+JNJ      $150.68  $150.71   14      $0.42    0.02%
+NVDA     $121.59  $119.54   16      $-32.80  -1.69%
+
+Current Positions:
+Symbol  Entry Time    Entry $   Current $  Shares  P&L($)   P&L(%)
+---------------------------------------------------------------------
+JNJ     11:25:06 ET  $150.71   $152.78    13      $26.84   1.37%
+MSFT    14:23:35 ET  $423.95   $434.36    4       $41.62   2.45%
+NVDA    11:46:41 ET  $118.68   $118.25    16      $-6.88   -0.36%
+```
+
+![Trade Distribution](visualization/trading_results.png)
+*Distribution of trades showing entry/exit points and P&L*
 
 ## Installation & Usage
 
