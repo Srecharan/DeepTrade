@@ -235,6 +235,7 @@ python tests/unit/test_validation_collector.py
 
 ### 4. Stock Selection & Training
 The repository comes pre-trained with nine major stocks:
+
 AAPL (Apple)          MSFT (Microsoft)      AMD (Advanced Micro Devices)
 GME (GameStop)        NVDA (NVIDIA)         JNJ (Johnson & Johnson)
 META (Meta)           GOOGL (Google)        AMZN (Amazon)
