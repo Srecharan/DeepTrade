@@ -52,23 +52,71 @@ The model training pipeline includes:
   - Early stopping with patience
   - Model performance tracking
 
+- **Model Performance Metrics**:
+  - LSTM Mean: 0.3630, Std: 0.1007
+  - XGBoost Mean: 0.1408, Std: 0.0622
+  - Average Training Length: 60-120 epochs
+  - Convergence monitored through validation loss
+  - Early stopping with 30-epoch patience
+  - Cross-validation with 5 folds
+
+The metrics represent Mean Absolute Error (MAE) on normalized returns. Model training uses a sliding window approach with dynamic batch sizes and learning rate adjustment based on validation performance.
+
 ![Training History](visualization/stock_training_history_collage.png)
 *Training convergence showing loss metrics and validation performance*
 
 ## 2. Sentiment Analysis Pipeline
 
 ### Multi-Source Integration
-- **Financial News Processing**: Real-time analysis of market news (40%)
-- **Reddit Sentiment**: Analysis of market-related subreddits (30%)
-- **SEC Filing Analysis**: Automated processing of financial documents (30%)
 
-### Sentiment Processing
-- FinBERT model fine-tuned for financial text
-- Real-time sentiment scoring and aggregation
-- Advanced feature engineering:
-  - Sentiment momentum indicators
+- **Financial News Processing (40%)**
+  - Real-time streaming with NewsAPI integration
+  - Automated headline + description analysis
+  - Relevancy-based filtering and aggregation
+  - Intelligent caching with TTL management
+
+- **Reddit Sentiment Analysis (30%)**
+  - Multi-subreddit monitoring (r/wallstreetbets, r/stocks, r/investing)
+  - Advanced engagement metrics (upvote ratio, comment sentiment)
+  - Company name variant matching
+  - Post-comment sentiment weighting system
+
+- **SEC Filing Analysis (30%)**
+  - Real-time CIK tracking and validation
+  - Form-specific sentiment weighting (10-K, 10-Q, 8-K prioritization)
+  - Automated filing pattern analysis
+  - Temporal decay weighting for recent filings
+
+### FinBERT Model Architecture
+- **Model**: ProsusAI/finbert (fine-tuned BERT for finance)
+- **Processing**:
+  - Token truncation at 512 length
+  - Three-class classification (positive/neutral/negative)
+  - Softmax probability distribution
+  - Custom sentiment score calculation
+
+### Feature Engineering
+- **Temporal Features**:
+  - 3-day and 7-day moving averages
+  - Sentiment momentum calculation
+  - Volatility regime detection
+  - Trend acceleration metrics
+
+- **Market Integration**:
   - Volume-weighted sentiment signals
-  - Trend strength analysis
+  - Price-sentiment correlation metrics
+  - Trading volume impact analysis
+  - Cross-source sentiment validation
+
+### Real-time Processing
+- **Data Pipeline**:
+  - Asynchronous source aggregation
+  - Intelligent caching system
+  - Rate limit management
+  - Failure recovery mechanisms
+
+![Sentiment Analysis](visualization/sentiment_analysis.png)
+*Multi-source sentiment analysis showing source-specific scores and aggregated metrics*
 
 ![Sentiment Analysis](visualization/sentiment_analysis.png)
 *Sentiment analysis across different sources and stocks*
