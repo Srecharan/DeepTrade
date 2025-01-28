@@ -236,9 +236,9 @@ python tests/unit/test_validation_collector.py
 ### 4. Stock Selection & Training
 The repository comes pre-trained with nine major stocks:
 
-AAPL (Apple)          MSFT (Microsoft)      AMD (Advanced Micro Devices)
-GME (GameStop)        NVDA (NVIDIA)         JNJ (Johnson & Johnson)
-META (Meta)           GOOGL (Google)        AMZN (Amazon)
+AAPL (Apple)              MSFT (Microsoft)          AMD (Advanced Micro Devices)  
+GME (GameStop)            NVDA (NVIDIA)             JNJ (Johnson & Johnson)  
+META (Meta)               GOOGL (Google)            AMZN (Amazon)
 
 To add new stocks for prediction and trading:
 1. Add the stock symbol to the `symbols` list in `test_model_training.py`
@@ -272,6 +272,7 @@ python tests/unit/test_model_training.py
 
 This project is licensed under the MIT License. Special thanks to:
 - ProsusAI for the FinBERT model
+- Tradier API for paper trading integration
 - Reddit API for market sentiment data
 - NewsAPI for financial news access
 
