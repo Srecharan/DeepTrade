@@ -2,7 +2,7 @@ from utils.prediction_system import PredictionSystem
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 from typing import Dict, List
@@ -10,16 +10,18 @@ import os
 from utils.reddit_sentiment import EnhancedRedditAnalyzer
 from utils.sec_data_collector import SECDataCollector
 
-def plot_predictions(symbol, predictions, history_data):
+def plot_predictions(symbol, predictions, data):
     plt.figure(figsize=(12, 6))
     
     # Plot historical prices
-    plt.plot(history_data.index[-30:], history_data['Close'][-30:], 
+    plt.plot(data.index[-30:], data['Close'][-30:], 
              label='Historical Price', color='blue')
     
     # Plot prediction point
-    last_date = history_data.index[-1]
-    plt.scatter(last_date, predictions['risk_metrics']['current_price'], 
+    last_date = data.index[-1]
+    current_price = predictions['risk_metrics']['current_price']['price'] if isinstance(predictions['risk_metrics']['current_price'], dict) else predictions['risk_metrics']['current_price']
+    
+    plt.scatter(last_date, current_price, 
                color='blue', marker='o')
     
     # Plot prediction
@@ -42,9 +44,19 @@ def plot_predictions(symbol, predictions, history_data):
     plt.savefig(f'visualization/{symbol}_prediction.png')
     plt.close()
 
+def print_summary(symbol, current_price, predictions):
+    print(f"\nPrediction Summary for {symbol}")
+    print("-" * 40)
+    print(f"Current Price: ${current_price:.2f}")
+    print(f"Predicted Price: ${predictions['risk_metrics']['prediction_price']:.2f}")
+    print(f"Expected Return: {predictions['risk_metrics']['prediction_return']:.2f}%")
+    print(f"Confidence Score: {predictions['risk_metrics']['confidence_score']:.2%}")
+    print(f"Sentiment Score: {predictions['risk_metrics']['sentiment_score']:.2f}")
+    print("-" * 40)
+
 def test_predictions():
     prediction_system = PredictionSystem()
-    symbols = ['NVDA', 'AAPL', 'MSFT']  # or ['GME', 'AMD', 'JNJ']
+    symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN']
     
     print("\nStarting Prediction Test")
     print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S ET')}")
@@ -52,24 +64,36 @@ def test_predictions():
     
     for symbol in symbols:
         try:
-            # Get real-time price first
-            current_price = prediction_system.stock_manager.get_real_time_price(symbol)
+            # Get historical data first
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=30)
+            data = prediction_system.stock_manager.fetch_stock_data(
+                symbol,
+                start_date.strftime('%Y-%m-%d'),
+                end_date.strftime('%Y-%m-%d')
+            )
             
-            # Get sentiment data
-            reddit_analyzer = EnhancedRedditAnalyzer(...)
-            sec_collector = SECDataCollector()
+            # Make predictions
+            predictions = prediction_system.predict(symbol)
             
-            # Make predictions based on real-time price
-            predictions = prediction_system.predict(symbol, current_price)
-            
-            # Create visualization
-            plot_predictions(symbol, predictions, data)
-            
-            # Print single summary
-            print_summary(symbol, current_price, predictions, ...)
+            if predictions and not data.empty:
+                # Get current price from predictions
+                current_price = (predictions['risk_metrics']['current_price']['price'] 
+                               if isinstance(predictions['risk_metrics']['current_price'], dict) 
+                               else predictions['risk_metrics']['current_price'])
+                
+                # Create visualization
+                plot_predictions(symbol, predictions, data)
+                
+                # Print prediction summary
+                print_summary(symbol, current_price, predictions)
+            else:
+                print(f"No valid predictions or data for {symbol}")
             
         except Exception as e:
             print(f"Error processing {symbol}: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
 
 if __name__ == "__main__":
     test_predictions()

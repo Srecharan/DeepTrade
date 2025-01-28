@@ -92,7 +92,7 @@ def test_integrated_predictions():
     """Test predictions with all data sources"""
     prediction_system = PredictionSystem()
     #symbols = ['NVDA']
-    symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN']
+    symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN' ]
     timeframes = ['5min', '15min', '30min', '1h']
     results = {}
 

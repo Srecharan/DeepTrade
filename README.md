@@ -10,6 +10,27 @@ DeepTrade AI is a cutting-edge stock prediction and automated trading system tha
 
 ## Key Features
 
+### Stock Prediction Engine
+- **Multi-Model Architecture**
+  - LSTM Neural Networks with attention mechanism
+  - XGBoost for feature-based prediction
+  - Ensemble methods combining both models
+  - Dynamic confidence interval calculations
+- **Supported Stocks**
+  - Core Tech: AAPL, NVDA, MSFT
+  - Growth: AMD, GME
+  - Stable: JNJ
+- **Prediction Capabilities**
+  - Multiple timeframes (5min to 1h)
+  - Price direction and magnitude
+  - Confidence scores and risk metrics
+
+![Stock Predictions](visualization/stock_prediction_collage.png)
+*Prediction results across multiple stocks*
+
+![Training History](visualization/stock_training_history_collage.png)
+*Model training convergence and validation*
+
 ### Advanced Sentiment Analysis Pipeline
 
 The system employs a sophisticated multi-source sentiment analysis approach:
