@@ -146,9 +146,9 @@ symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN']
 max_positions = 2              # Maximum concurrent positions
 position_size = 0.02          # 2% capital per trade
 max_daily_risk = 0.02        # Maximum 2% account risk per day
+max_trade_risk = 0.01        # Maximum 1% risk per trade
 stop_loss_pct = 0.015        # 1.5% stop loss
 take_profit_pct = 0.03       # 3% take profit
-trailing_stop_pct = 0.005    # 0.5% trailing stop when profitable
 ```
 
 ### Strategy Implementation
@@ -156,50 +156,47 @@ trailing_stop_pct = 0.005    # 0.5% trailing stop when profitable
 # Signal Generation Pipeline
 # 1. Price Analysis
 trend_composite = (
-    daily_score * 0.4 +     # Daily trend weight
-    hourly_score * 0.4 +    # Hourly trend weight
-    minute_score * 0.2      # Short-term momentum
+    daily_trend_score * 0.4 +     # Daily trend (strong_uptrend: 2, uptrend: 1, sideways: 0, etc.)
+    hourly_trend_score * 0.4 +    # Hourly trend
+    minute_trend_score * 0.2      # 15-min trend
 )
 
 # 2. Entry Signal Generation
-entry_signals = {
-    'pullback': near_support and trend_composite > -0.5,
-    'breakout': near_resistance and trend_composite > -0.3,
-    'momentum': trend_composite > 0.3
+entry_conditions = {
+    'trend_composite': trend_composite > 0,
+    'volume_condition': (
+        market_analysis['15min']['relative_volume'] > 0.8 or
+        market_analysis['1h']['relative_volume'] > 0.5 or
+        market_analysis['1d']['relative_volume'] > 0.3
+    ),
+    'near_support': min(support_distances) <= 0.02,
+    'near_resistance': min(resistance_distances) <= 0.02
 }
 
 # 3. Position Management
 position_params = {
     'max_hold_time': 180,    # Maximum minutes
     'min_hold_time': 5,      # Minimum minutes
-    'volume_req': 0.8        # 80% of average volume
+    'stop_loss_pct': 0.015,  # 1.5% stop loss
+    'take_profit_pct': 0.03  # 3% take profit
 }
 ```
 
 ### Trading Controls
-- Dynamic position sizing based on volatility
-- Maximum 3 trades per day
+- Maximum 2 concurrent positions
 - Position hold time: 5-180 minutes
-- Real-time sentiment integration
-- Multi-timeframe trend analysis
-- Volume profile validation (>80% 15min average)
-
-### Current Trading Session Example
-```
-Active Session Status:
-- Monitoring: 9 symbols
-- Market Hours: 9:30 AM - 4:00 PM ET
-- Check Interval: 180 seconds (15min timeframe)
-- Position Limit: 2 concurrent positions
-- Risk per Trade: 2% of capital
-
-Current Positions:
-Symbol  Entry Time    Entry $   Current $  Shares  P&L($)   P&L(%)
----------------------------------------------------------------------
-JNJ     11:25:06 ET  $150.71   $152.78    13      $26.84   1.37%
-MSFT    14:23:35 ET  $423.95   $434.36    4       $41.62   2.45%
-NVDA    11:46:41 ET  $118.68   $118.25    16      $-6.88   -0.36%
-```
+- Volume requirements:
+  * 15-min volume > 80% average
+  * Hourly volume > 50% average
+  * Daily volume > 30% average
+- Multi-timeframe trend analysis:
+  * Daily trend weight: 40%
+  * Hourly trend weight: 40%
+  * 15-min trend weight: 20%
+- Entry types:
+  * Pullback: Near support with trend > -0.5
+  * Breakout: Near resistance with trend > -0.3
+  * Momentum: Trend composite > 0.3
 
 ## Installation & Usage
 
@@ -259,36 +256,7 @@ python tests/unit/test_model_training.py
 
 ## Performance Metrics
 
-- ### Price Prediction
-- Directional Accuracy: 82.76% (1-hour timeframe)
-- Mean Absolute Error: 0.73% (5-min predictions)
-- Confidence Scoring: 87-93%
-
-### Sentiment Analysis
-- Coverage: 300+ daily news articles
-- 60+ Reddit posts per stock
-- Real-time SEC filing processing
-
-### Trading Performance (January 2025)
-- Win Rate: 50.0% across all trades
-- Average Hold Time: ~180 minutes
-- Risk Metrics:
-  - Capital Preservation: 98.5%
-  - Maximum Drawdown: 2% per position
-  - Sharpe Ratio: 1.2 (annualized)
-  - Sortino Ratio: 1.5
-
-- Position Management:
-  - Entry Accuracy: 67% successful signals
-  - Exit Efficiency: 82% profit targets hit
-  - Average Holding Period: 180 minutes
-  - Position Success Rate: 65%
-
-- Risk-Adjusted Returns:
-  - Total Return: 0.20%
-  - Risk-Adjusted Return: 0.15%
-  - Maximum Drawdown: 2.0%
-  - Recovery Time: 1 trading day
+[Performance metrics will be updated after completion of full trading day session - January 28, 2025]
 
 ## License & Attribution
 

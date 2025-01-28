@@ -1,12 +1,12 @@
 {
     "5min": {
-        "sample_size": 37,
-        "mean_absolute_error": 0.15974402094348183,
+        "sample_size": 39,
+        "mean_absolute_error": 0.15699963670243244,
         "median_error": 0.15993025534015387,
         "max_error": 0.5194432699566159,
-        "direction_accuracy": 56.75675675675676,
-        "ci_coverage": 2.7027027027027026,
-        "error_std": 0.10806399929864281
+        "direction_accuracy": 56.41025641025641,
+        "ci_coverage": 2.564102564102564,
+        "error_std": 0.107141995575423
     },
     "15min": {
         "sample_size": 35,

@@ -1,0 +1,14 @@
+{
+    "5min": {
+        "sample_size": 2,
+        "mean_absolute_error": 0.1745275951082887,
+        "median_error": 0.1745275951082887,
+        "max_error": 0.2085923317349705,
+        "direction_accuracy": 50.0,
+        "ci_coverage": 0.0,
+        "error_std": 0.03406473662668179
+    },
+    "15min": {},
+    "30min": {},
+    "1h": {}
+}
