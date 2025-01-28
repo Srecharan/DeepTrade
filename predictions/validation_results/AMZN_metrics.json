@@ -1,14 +1,22 @@
 {
     "5min": {
-        "sample_size": 2,
-        "mean_absolute_error": 0.1745275951082887,
-        "median_error": 0.1745275951082887,
+        "sample_size": 3,
+        "mean_absolute_error": 0.12525033803111277,
+        "median_error": 0.14046285848160692,
         "max_error": 0.2085923317349705,
-        "direction_accuracy": 50.0,
-        "ci_coverage": 0.0,
-        "error_std": 0.03406473662668179
+        "direction_accuracy": 33.33333333333333,
+        "ci_coverage": 33.33333333333333,
+        "error_std": 0.07503399441406741
     },
-    "15min": {},
+    "15min": {
+        "sample_size": 1,
+        "mean_absolute_error": 0.2284646287639997,
+        "median_error": 0.2284646287639997,
+        "max_error": 0.2284646287639997,
+        "direction_accuracy": 100.0,
+        "ci_coverage": 0.0,
+        "error_std": 0.0
+    },
     "30min": {},
     "1h": {}
 }

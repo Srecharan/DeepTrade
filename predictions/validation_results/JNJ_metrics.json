@@ -1,21 +1,21 @@
 {
     "5min": {
-        "sample_size": 39,
-        "mean_absolute_error": 0.15699963670243244,
-        "median_error": 0.15993025534015387,
+        "sample_size": 40,
+        "mean_absolute_error": 0.15381307130183533,
+        "median_error": 0.15483551496350026,
         "max_error": 0.5194432699566159,
-        "direction_accuracy": 56.41025641025641,
-        "ci_coverage": 2.564102564102564,
-        "error_std": 0.107141995575423
+        "direction_accuracy": 57.49999999999999,
+        "ci_coverage": 2.5,
+        "error_std": 0.10764959729848451
     },
     "15min": {
-        "sample_size": 35,
-        "mean_absolute_error": 0.21389460560816612,
-        "median_error": 0.2105475058911883,
+        "sample_size": 36,
+        "mean_absolute_error": 0.21343355295779007,
+        "median_error": 0.20392210804290817,
         "max_error": 0.6232224979487858,
-        "direction_accuracy": 60.0,
-        "ci_coverage": 2.857142857142857,
-        "error_std": 0.15842619008771958
+        "direction_accuracy": 61.111111111111114,
+        "ci_coverage": 2.7777777777777777,
+        "error_std": 0.1562341420689141
     },
     "30min": {
         "sample_size": 33,
