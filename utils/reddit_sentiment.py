@@ -32,17 +32,13 @@ class EnhancedRedditAnalyzer:
     def analyze_post(self, post, symbol):
         """Detailed analysis of a single post"""
         try:
-            # Get post content
             full_text = f"{post.title} {post.selftext}"
             
-            # Analyze post sentiment
             post_sentiment = self.get_text_sentiment(full_text)
-            
-            # Get top comments
+
             post.comments.replace_more(limit=0)
             top_comments = list(post.comments)[:5]
-            
-            # Analyze comment sentiment
+
             comment_sentiments = []
             for comment in top_comments:
                 sentiment = self.get_text_sentiment(comment.body)

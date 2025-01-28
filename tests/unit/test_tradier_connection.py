@@ -8,7 +8,6 @@ def test_tradier_connection():
     TRADIER_TOKEN = "2jacA1MpXvcFWhrg7ZQfUcf4fYww"  # Sandbox token
     ENDPOINT = "https://sandbox.tradier.com/v1"
 
-    # Set up headers
     headers = {
         'Authorization': f'Bearer {TRADIER_TOKEN}',
         'Accept': 'application/json'

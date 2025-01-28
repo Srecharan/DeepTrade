@@ -99,14 +99,12 @@ class ValidationCollector:
         comparison_data = []
         symbols = list(all_metrics.keys())
         
-        # Add sample size information
         sample_data = ["Sample Size"]
         for symbol in symbols:
             max_samples = max((m.get('sample_size', 0) for m in all_metrics[symbol].values()), default=0)
             sample_data.append(str(max_samples))
         comparison_data.append(sample_data)
         
-        # Add timeframe comparisons
         for timeframe in ['5min', '15min', '30min', '1h']:
             timeframe_data = [timeframe]
             
@@ -161,7 +159,6 @@ class ValidationCollector:
                 now = datetime.now(self.et_tz)
                 current_date = now.date()
                 
-                # Enhanced market hours check
                 is_market_open = self.is_market_hours(now)
                 current_time = now.strftime('%H:%M:%S ET')
                 
@@ -186,7 +183,6 @@ class ValidationCollector:
                     time.sleep(sleep_interval)
                     continue
                 
-                # Only increment days_completed when we've had a full trading day
                 if last_trading_date is None or current_date != last_trading_date:
                     last_trading_date = current_date
                     if now > market_close:  # Only increment at end of trading day
@@ -194,8 +190,7 @@ class ValidationCollector:
                         print(f"\nCompleted trading day {days_completed} of {days}")
                 
                 print(f"\nCollecting data at {current_time}")
-                
-                # Process each symbol with retries
+
                 for symbol in symbols:
                     try:
                         metrics = self.validator.validate_stored_predictions(symbol)
@@ -207,7 +202,6 @@ class ValidationCollector:
                         if not self.handle_collection_error(symbol, e, error_counts):
                             continue
                 
-                # Adaptive wait time
                 wait_time = self.calculate_adaptive_interval(metrics if 'metrics' in locals() else None)
                 print(f"\nWaiting {wait_time} seconds before next check...")
                 time.sleep(wait_time)
@@ -225,8 +219,8 @@ class ValidationCollector:
     
 def main():
     try:
-        # Monitor 6 major stocks
-        symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ']
+
+        symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN' ]
         #symbols =['NVDA']
         days = 1  # Run for 1 trading day
         

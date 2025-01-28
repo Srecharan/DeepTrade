@@ -20,9 +20,8 @@ from utils.config import (
     REDDIT_USER_AGENT
 )
 
-# test_integrated_predictions.py
 def print_price_summary(symbol: str, price_info: Dict):
-    """Enhanced price summary with verified market prices and None handling"""
+    """ Price summary with verified market prices and None handling"""
     try:
         if price_info is None:
             print(f"\n{symbol} Price Details: No price data available")
@@ -33,7 +32,6 @@ def print_price_summary(symbol: str, price_info: Dict):
         
         print(f"\n{symbol} Price Details ({current_time.strftime('%H:%M:%S ET')}):")
         
-        # Safely get values with defaults
         price = price_info.get('price')
         if price is None:
             print("No current price available")
@@ -47,7 +45,6 @@ def print_price_summary(symbol: str, price_info: Dict):
         if timestamp.tzinfo is None:
             timestamp = et_tz.localize(timestamp)
         
-        # Print available information
         print(f"Current Price: ${price:.2f}")
         print(f"Timestamp: {timestamp.strftime('%H:%M:%S ET')}")
         print(f"Source: {source}")
@@ -59,7 +56,6 @@ def print_price_summary(symbol: str, price_info: Dict):
                 market_close_time = et_tz.localize(market_close_time)
             print(f"Market Close: ${market_close:.2f} ({market_close_time.strftime('%H:%M:%S ET')})")
         
-        # Add delay warning if applicable
         time_diff = (current_time - timestamp).total_seconds()
         if time_diff > 5:
             print(f"WARNING: Price delay of {time_diff:.1f} seconds")
@@ -111,7 +107,7 @@ def test_integrated_predictions():
             
             # Get sentiment data ONCE per symbol
             try:
-                # Get base predictions (includes sentiment calculation)
+    
                 base_predictions = prediction_system.predict(symbol)
                 sentiment_data = {
                     'sentiment_score': base_predictions['risk_metrics']['sentiment_score'],
@@ -122,7 +118,7 @@ def test_integrated_predictions():
                 print(f"Error getting sentiment data: {str(e)}")
                 sentiment_data = None
             
-            # Make predictions for each timeframe
+           
             timeframe_predictions = {}
             for timeframe in timeframes:
                 try:
@@ -136,7 +132,7 @@ def test_integrated_predictions():
                 except Exception as e:
                     print(f"Error predicting {timeframe} for {symbol}: {str(e)}")
             
-            # Store results
+         
             results[symbol] = timeframe_predictions
             
         except Exception as e:
@@ -156,8 +152,7 @@ def print_summary_report(results: Dict):
     for symbol, timeframes in results.items():
         print(f"\n{symbol} Predictions Summary:")
         print("-" * 30)
-        
-        # Get current price for reference
+ 
         current_price = None
         if timeframes:
             first_timeframe = next(iter(timeframes.values()))

@@ -8,8 +8,7 @@ def test_sec_integration():
     """Test SEC data collection and analysis"""
     collector = SECDataCollector()
     
-    # Test with your existing stock symbols
-    symbols = ['AAPL', 'MSFT', 'NVDA']
+    symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN' ]
     
     results = {}
     
@@ -25,7 +24,6 @@ def test_sec_integration():
         # Get comprehensive SEC data
         analysis = collector.analyze_filings(symbol)
         
-        # Print detailed summary
         print(f"\nFiling Analysis:")
         print(f"Total Filings: {analysis['filing_count']}")
         if analysis['latest_filing_date']:
@@ -48,7 +46,6 @@ def test_sec_integration():
             for form in analysis['important_forms'][:3]:  # Show latest 3
                 print(f"- {form['date']}: {form['type']}")
         
-        # Store results for later use
         results[symbol] = {
             'sec_sentiment': analysis['sentiment_score'],
             'sec_confidence': analysis['confidence'],
@@ -56,7 +53,6 @@ def test_sec_integration():
             'metrics': analysis['metrics']
         }
         
-        # Respect SEC rate limits
         time.sleep(1)
     
     return results

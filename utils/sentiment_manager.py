@@ -19,7 +19,6 @@ class SentimentDataManager:
         
         file_path = f"{self.sentiment_db_path}/{symbol}_sentiment.csv"
         
-        # Read existing data if file exists
         if os.path.exists(file_path):
             df = pd.read_csv(file_path)
             # Remove any existing entry for today to avoid duplicates
@@ -29,7 +28,6 @@ class SentimentDataManager:
         else:
             df = pd.DataFrame([data])
             
-        # Save with date as index to ensure uniqueness
         df['date'] = pd.to_datetime(df['date'])
         df = df.drop_duplicates(subset=['date'], keep='last')
         df.to_csv(file_path, index=False)

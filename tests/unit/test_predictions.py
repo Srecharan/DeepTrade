@@ -13,22 +13,18 @@ from utils.sec_data_collector import SECDataCollector
 def plot_predictions(symbol, predictions, data):
     plt.figure(figsize=(12, 6))
     
-    # Plot historical prices
     plt.plot(data.index[-30:], data['Close'][-30:], 
              label='Historical Price', color='blue')
-    
-    # Plot prediction point
+
     last_date = data.index[-1]
     current_price = predictions['risk_metrics']['current_price']['price'] if isinstance(predictions['risk_metrics']['current_price'], dict) else predictions['risk_metrics']['current_price']
     
     plt.scatter(last_date, current_price, 
                color='blue', marker='o')
-    
-    # Plot prediction
+
     plt.scatter(last_date, predictions['risk_metrics']['prediction_price'], 
                color='red', marker='*', s=150, label='Prediction')
-    
-    # Plot confidence interval
+
     plt.fill_between([last_date], 
                     [predictions['confidence_interval'][0]], 
                     [predictions['confidence_interval'][1]], 
@@ -72,8 +68,7 @@ def test_predictions():
                 start_date.strftime('%Y-%m-%d'),
                 end_date.strftime('%Y-%m-%d')
             )
-            
-            # Make predictions
+
             predictions = prediction_system.predict(symbol)
             
             if predictions and not data.empty:
@@ -81,11 +76,9 @@ def test_predictions():
                 current_price = (predictions['risk_metrics']['current_price']['price'] 
                                if isinstance(predictions['risk_metrics']['current_price'], dict) 
                                else predictions['risk_metrics']['current_price'])
-                
-                # Create visualization
+
                 plot_predictions(symbol, predictions, data)
-                
-                # Print prediction summary
+
                 print_summary(symbol, current_price, predictions)
             else:
                 print(f"No valid predictions or data for {symbol}")

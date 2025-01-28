@@ -50,7 +50,6 @@ class RealtimeDataManager:
 
         def on_open(ws):
             print("WebSocket connection opened")
-            # Subscribe to ticker updates
             subscribe_message = {
                 "action": "subscribe",
                 "params": f"T.{','.join(symbols)}"

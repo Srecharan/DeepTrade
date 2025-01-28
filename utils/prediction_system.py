@@ -12,9 +12,6 @@ import pickle
 from datetime import datetime, timedelta
 import numpy as np
 
-
-# Update this in prediction_system.py
-
 class PredictionSystem:
     def __init__(self, model_dir: str = "models/trained/"):
         self.model_dir = model_dir
@@ -31,11 +28,9 @@ class PredictionSystem:
             timeframe: One of '5min', '15min', '30min', '1h', '1d'
         """
         try:
-            # Load models if not already loaded
             if f'{symbol}_lstm' not in self.models:
                 self.load_models(symbol)
                 
-            # Get historical data and sentiment
             if sentiment_data:
                 print(f"Using cached sentiment for {symbol}")
                 data, sentiment = self.stock_manager.prepare_prediction_data(
@@ -155,7 +150,6 @@ class PredictionSystem:
                         (predictions['ensemble'] / current_price - 1) * 100
                     )
                     
-                    # Add timeframe info
                     predictions['timeframe'] = timeframe
                     predictions['target_timestamp'] = (
                         datetime.now() + timedelta(minutes=minutes)
@@ -166,8 +160,6 @@ class PredictionSystem:
         except Exception as e:
             print(f"Error in prediction: {str(e)}")
             raise e
-
-    # Add this new method right after the predict method:
 
     def predict_timeframe(self, symbol: str, timeframe: str, sentiment_data: Dict = None) -> Dict:
         """Make predictions for specific timeframes
@@ -182,21 +174,18 @@ class PredictionSystem:
         if timeframe not in valid_timeframes:
             raise ValueError(f"Invalid timeframe. Must be one of {valid_timeframes}")
         
-        # Get base predictions with sentiment_data parameter
         predictions = self.predict(
             symbol, 
             window_size=30,
-            sentiment_data=sentiment_data,  # Changed from sentiment_override
+            sentiment_data=sentiment_data,  
             timeframe=timeframe
         )
         
         if not predictions:
             return None
             
-        # Get current price info
         current_price = predictions['risk_metrics']['current_price']
         
-        # Calculate target timestamp
         minutes_map = {
             '5min': 5,
             '15min': 15,
@@ -206,7 +195,6 @@ class PredictionSystem:
         }
         target_time = datetime.now() + timedelta(minutes=minutes_map[timeframe])
         
-        # Format response
         return {
             'timeframe': timeframe,
             'current_price': current_price,
@@ -249,7 +237,6 @@ class PredictionSystem:
                     dropout=0.3
                 )
                 
-                # Load with safety checks
                 state_dict = torch.load(lstm_path, weights_only=True)
                 lstm_model.load_state_dict(state_dict)
                 lstm_model.eval()
@@ -290,7 +277,6 @@ class PredictionSystem:
         recent_trend = returns.tail(5).mean()
         prediction_return = (prediction / current_price) - 1
         
-        # Calculate adjusted Sharpe ratio
         risk_free_rate = 0.04  # Assume 4% risk-free rate
         excess_return = returns.mean() * 252 - risk_free_rate
         sharpe_ratio = excess_return / (volatility) if volatility != 0 else 0
@@ -309,19 +295,15 @@ class PredictionSystem:
     
     def calculate_prediction_confidence(self, predictions: Dict, data: pd.DataFrame) -> float:
         """Calculate confidence score based on multiple factors"""
-        # Model agreement
         pred_values = np.array(list(predictions.values()))
         model_agreement = 1 - (np.std(pred_values) / np.mean(np.abs(pred_values)))
         
-        # Recent volatility
         volatility = data['Close'].pct_change().std() * np.sqrt(252)
         vol_score = 1 / (1 + volatility)
-        
-        # Sentiment consistency
+
         sent_std = data['raw_sentiment'].tail(5).std()
         sent_score = 1 / (1 + sent_std)
-        
-        # Combine scores
+
         confidence = (model_agreement * 0.5 + vol_score * 0.3 + sent_score * 0.2)
         return min(max(confidence, 0), 1)  # Normalize to [0,1]
     
@@ -358,8 +340,7 @@ class PredictionSystem:
         """Improved confidence score calculation"""
         if len(predictions) < 2:
             return 0.0
-            
-        # Calculate model agreement score (0-1)
+
         std_dev = np.std(predictions)
         mean_pred = np.mean(predictions)
         agreement_score = 1 - (std_dev / (mean_pred + 1e-6))  # Avoid division by zero
@@ -384,10 +365,10 @@ class PredictionSystem:
         
         # 2. Adjust for timeframe
         timeframe_factors = {
-            '5min': 0.5,   # Tighter interval for shorter timeframes
+            '5min': 0.5,   
             '15min': 0.75,
             '30min': 1.0,
-            '1h': 1.25     # Wider interval for longer timeframes
+            '1h': 1.25    
         }
         timeframe_factor = timeframe_factors.get(timeframe, 1.0)
         

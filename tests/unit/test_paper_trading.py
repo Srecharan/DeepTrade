@@ -50,7 +50,6 @@ def print_session_summary(results: dict, simulation: PaperTradingSimulation):
     et_tz = timezone('US/Eastern')
     print("\n" + "="*30 + " TRADING SESSION SUMMARY " + "="*30)
 
-    # COMPLETED TRADES (without timestamps)
     print("\n📈 COMPLETED TRADES (Most Recent 5):")
     trades = results.get('trades_history', [])
     if trades:
@@ -78,7 +77,6 @@ def print_session_summary(results: dict, simulation: PaperTradingSimulation):
     else:
         print("No trades history available")
 
-    # CURRENT POSITIONS (keeping timestamps)
     print("\n📊 CURRENT POSITIONS:")
     positions = results.get('open_positions', [])
     if positions:
@@ -120,7 +118,6 @@ def print_session_summary(results: dict, simulation: PaperTradingSimulation):
     else:
         print("No open positions")
 
-    # PERFORMANCE SUMMARY (unchanged)
     print(f"\n💰 SESSION SUMMARY:")
     summary_data = [
         ["Initial", "Final", "Total P&L", "Return", "Trades", "Win Rate"],

@@ -30,7 +30,6 @@ class FeatureImportanceAnalyzer:
         explainer = shap.TreeExplainer(rf_model)
         shap_values = explainer.shap_values(X)
         
-        # Combine importance scores
         combined_importance = (rf_importance + np.mean(np.abs(shap_values), axis=0)) / 2
         
         feat_imp = pd.DataFrame({

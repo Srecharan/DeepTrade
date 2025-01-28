@@ -19,7 +19,6 @@ class PerformanceAnalyzer:
         with open(metrics_file, 'r') as f:
             metrics = json.load(f)
             
-        # Compile key metrics across timeframes
         summary = {
             'symbol': symbol,
             'date': date or datetime.now().strftime('%Y-%m-%d'),
@@ -40,7 +39,6 @@ class PerformanceAnalyzer:
             }
             summary['timeframes'][timeframe] = timeframe_metrics
             
-        # Calculate aggregate metrics
         total_samples = sum(tf['sample_size'] for tf in summary['timeframes'].values())
         weighted_mae = sum(tf['mae'] * tf['sample_size'] for tf in summary['timeframes'].values()) / total_samples
         weighted_direction = sum(tf['direction_accuracy'] * tf['sample_size'] for tf in summary['timeframes'].values()) / total_samples
@@ -67,7 +65,6 @@ class PerformanceAnalyzer:
             'aggregate': {}
         }
         
-        # Compare timeframes
         for timeframe in set(perf1['timeframes'].keys()) & set(perf2['timeframes'].keys()):
             metrics1 = perf1['timeframes'][timeframe]
             metrics2 = perf2['timeframes'][timeframe]
@@ -78,8 +75,7 @@ class PerformanceAnalyzer:
                 'ci_coverage_change': metrics2['ci_coverage'] - metrics1['ci_coverage'],
                 'error_std_change': metrics2['error_std'] - metrics1['error_std']
             }
-            
-        # Compare aggregate metrics
+
         comparison['aggregate'] = {
             'weighted_mae_change': perf2['aggregate']['weighted_mae'] - perf1['aggregate']['weighted_mae'],
             'weighted_direction_change': perf2['aggregate']['weighted_direction_accuracy'] - perf1['aggregate']['weighted_direction_accuracy'],

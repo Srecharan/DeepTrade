@@ -40,7 +40,6 @@ class PredictionValidationSystem:
             
             self.validation_data[symbol].append(prediction_record)
             
-        # Save to file
         self._save_validation_data(symbol)
             
     def _get_timeframe_delta(self, timeframe: str) -> timedelta:
@@ -109,17 +108,14 @@ class PredictionValidationSystem:
                 
                 for pred in timeframe_preds:
                     if pred['actual_price'] is not None:
-                        # Calculate error
                         error = ((pred['actual_price'] - pred['predicted_price']) / 
                                 pred['current_price']) * 100
                         errors.append(abs(error))
                         
-                        # Check direction
                         pred_direction = pred['predicted_price'] > pred['current_price']
                         actual_direction = pred['actual_price'] > pred['current_price']
                         direction_correct.append(pred_direction == actual_direction)
                         
-                        # Check confidence interval
                         within_ci = (pred['confidence_interval'][0] <= pred['actual_price'] <= 
                                    pred['confidence_interval'][1])
                         within_confidence.append(within_ci)
@@ -133,7 +129,6 @@ class PredictionValidationSystem:
                         'sample_size': len(errors)
                     }
         
-        # Save metrics
         metrics_filepath = os.path.join(self.results_dir, f"{symbol}_metrics.json")
         with open(metrics_filepath, 'w') as f:
             json.dump(metrics, f, indent=4)
@@ -160,8 +155,7 @@ def main():
     validator = PredictionValidationSystem()
     prediction_system = PredictionSystem()
     
-    # Symbols to validate
-    #symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ']
+    #symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN' ]
     symbols = ['NVDA']
     
     print("\nStarting Prediction Validation")
@@ -173,7 +167,6 @@ def main():
         for symbol in symbols:
             print(f"\nProcessing {symbol}...")
             
-            # Get predictions for all timeframes
             timeframe_predictions = {}
             for timeframe in ['5min', '15min', '30min', '1h']:
                 try:
@@ -183,11 +176,9 @@ def main():
                 except Exception as e:
                     print(f"Error predicting {timeframe} for {symbol}: {e}")
             
-            # Store predictions for validation
             if timeframe_predictions:
                 validator.store_prediction(symbol, timeframe_predictions)
         
-        # Then validate any predictions that have reached their target time
         print("\nValidating previous predictions...")
         for symbol in symbols:
             validator.validate_predictions(symbol)

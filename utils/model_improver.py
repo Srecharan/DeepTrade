@@ -31,7 +31,6 @@ class ModelImprover:
             }
             analysis[timeframe] = timeframe_analysis
             
-        # Generate overall recommendations
         recommendations = self._generate_recommendations(analysis)
         
         report = {
@@ -123,7 +122,6 @@ class ModelImprover:
         """Generate overall improvement recommendations"""
         recommendations = []
         
-        # Check for systematic issues across timeframes
         error_issues = []
         direction_issues = []
         confidence_issues = []
@@ -138,7 +136,6 @@ class ModelImprover:
                     elif issue['type'] == 'confidence_interval':
                         confidence_issues.append(timeframe)
         
-        # Generate high-level recommendations
         if error_issues:
             recommendations.append({
                 'priority': 'High',

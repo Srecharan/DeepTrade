@@ -9,9 +9,8 @@ def test_enhanced_features():
     stock_manager = StockManager()
     sentiment_manager = SentimentDataManager()
     feature_analyzer = FeatureImportanceAnalyzer()
-    
-    # Test with NVDA
-    symbols = ['TSLA', 'GME', 'NVDA', 'AMD', 'AAPL'] 
+
+    symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN' ]
     #symbols = ['GME', 'AMD', 'MSFT'] 
     #symbols = ['JNJ', 'PG', 'KO']  # Johnson & Johnson, Procter & Gamble, Coca-Cola
     #symbols = ['PLTR', 'SNAP', 'RBLX']  # Palantir, Snap, Roblox

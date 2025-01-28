@@ -32,11 +32,9 @@ class SECDataCollector:
         self.base_url = "https://data.sec.gov"
     
     def get_cik(self, symbol: str) -> Optional[str]:
-        # First check our lookup dictionary
         if symbol in self.cik_lookup:
             return self.cik_lookup[symbol]
             
-        # This is the fallback API code that's already implemented
         try:
             time.sleep(0.2)  # Rate limiting
             url = f"{self.base_url}/files/company_tickers.json"
@@ -63,7 +61,7 @@ class SECDataCollector:
             return None
             
         try:
-            time.sleep(0.2)  # Rate limiting
+            time.sleep(0.2)  
             url = f"{self.base_url}/api/xbrl/companyfacts/CIK{cik}.json"
             response = requests.get(url, headers=self.headers)
             
@@ -84,7 +82,7 @@ class SECDataCollector:
             return []
             
         try:
-            time.sleep(0.2)  # Rate limiting
+            time.sleep(0.2)  
             url = f"{self.base_url}/submissions/CIK{cik}.json"
             response = requests.get(url, headers=self.headers)
             
@@ -130,7 +128,6 @@ class SECDataCollector:
         }
         
         if filings:
-            # Get latest filing date
             analysis['latest_filing_date'] = max(f['date'] for f in filings)
             
             # Track important form types
@@ -139,7 +136,6 @@ class SECDataCollector:
                 form_type = filing['form']
                 form_counts[form_type] = form_counts.get(form_type, 0) + 1
                 
-                # Important forms affect sentiment
                 if form_type in ['10-K', '10-Q', '8-K']:
                     analysis['important_forms'].append({
                         'type': form_type,
@@ -150,7 +146,6 @@ class SECDataCollector:
             analysis['sentiment_score'] = self._calculate_filing_sentiment(filings)
             analysis['confidence'] = min(len(filings) / 10, 1.0)  # More filings = more confidence
         
-        # Extract financial metrics if available
         if facts:
             analysis['metrics'] = self._extract_key_metrics(facts)
         

@@ -21,17 +21,16 @@ def test_model_training():
     model_trainer = ModelTrainer()
     os.makedirs('visualization', exist_ok=True)
     
-    # Test with a few symbols
-    symbols = ['META', 'GOOGL', 'AMZN']
+    # Test with symbols
+    symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN' ]
     
     for symbol in symbols:
         print(f"\n===================================== Training models for {symbol} =====================================")
         try:
-            # Get data with both technical and sentiment features
             data, _ = stock_manager.prepare_prediction_data(symbol)
             data = data.fillna(method='ffill').fillna(method='bfill')
             
-            # Train models and get history
+          
             models, history = model_trainer.train_models(data, symbol)
             
             # Plot training history

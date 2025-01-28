@@ -12,7 +12,6 @@ class EnhancedRedditAnalyzer:
             client_secret=client_secret,
             user_agent=user_agent
         )
-        # Company name mappings
         self.company_names = {
             'AAPL': ['Apple', 'AAPL', 'iPhone'],
             'MSFT': ['Microsoft', 'MSFT', 'Azure'],
@@ -29,17 +28,12 @@ class EnhancedRedditAnalyzer:
     def analyze_post(self, post, symbol):
         """Detailed analysis of a single post"""
         try:
-            # Get post content
             full_text = f"{post.title} {post.selftext}"
-            
-            # Analyze post sentiment
+
             post_sentiment = self.get_text_sentiment(full_text)
-            
-            # Get top comments
             post.comments.replace_more(limit=0)
             top_comments = list(post.comments)[:5]
-            
-            # Analyze comment sentiment
+
             comment_sentiments = []
             for comment in top_comments:
                 sentiment = self.get_text_sentiment(comment.body)
@@ -47,7 +41,6 @@ class EnhancedRedditAnalyzer:
             
             avg_comment_sentiment = sum(comment_sentiments) / len(comment_sentiments) if comment_sentiments else 0
             
-            # Calculate engagement score
             engagement = post.score + post.num_comments
             upvote_ratio = post.upvote_ratio if hasattr(post, 'upvote_ratio') else 0.5
             
@@ -87,7 +80,6 @@ class EnhancedRedditAnalyzer:
                 print(f"\nSearching r/{subreddit_name}...")
                 
                 for term in search_terms:
-                    # Search for posts
                     for post in subreddit.search(term, time_filter='week', sort='hot', limit=5):
                         analysis = self.analyze_post(post, symbol)
                         if analysis:
@@ -99,7 +91,7 @@ class EnhancedRedditAnalyzer:
                             print(f"Sentiment: {analysis['total_sentiment']:.2f}, "
                                   f"Engagement: {analysis['engagement']}")
                 
-                time.sleep(2)  # Respect rate limits
+                time.sleep(2)  
                 
             except Exception as e:
                 print(f"Error in subreddit {subreddit_name}: {str(e)}")
@@ -109,7 +101,6 @@ class EnhancedRedditAnalyzer:
 
 def main():
     """Test the enhanced Reddit sentiment analyzer"""
-    # Your credentials
     CLIENT_ID = "iBwT-MV4tfjKRqsWgNH9tg"
     CLIENT_SECRET = "CHvuOU6N_xNmKt7n9yICtVQBz6LKlQ"
     USER_AGENT = "script:stock_sentiment:v1.0 (by /u/srecharan)"

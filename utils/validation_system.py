@@ -82,12 +82,10 @@ class ValidationSystem:
         with open(validation_file, 'r') as f:
             predictions = json.load(f)
 
-        # Get time range for historical data
         start_time = datetime.fromisoformat(min(p['timestamp'] for p in predictions)).astimezone(self.et_tz)
         end_time = datetime.fromisoformat(max(p['target_time'] for p in predictions)).astimezone(self.et_tz)
 
         try:
-            # Get historical data
             ticker = yf.Ticker(symbol)
             hist_data = ticker.history(
                 start=start_time.strftime('%Y-%m-%d'),
@@ -105,29 +103,23 @@ class ValidationSystem:
                 target_time = datetime.fromisoformat(pred['target_time']).astimezone(self.et_tz)
                 now = datetime.now(self.et_tz)
 
-                # Only validate predictions whose target time has passed
                 if target_time > now:
                     continue
 
-                # Find closest price data point
                 closest_times = hist_data.index[abs(hist_data.index - target_time) <= timedelta(minutes=1)]
                 if len(closest_times) > 0:
                     closest_time = min(closest_times, key=lambda x: abs(x - target_time))
                     actual_price = hist_data.loc[closest_time, 'Close']
-                    
-                    # Update prediction record
+
                     pred['actual_price'] = float(actual_price)  # Convert numpy float to Python float
                     pred['validated'] = True
                     validated_count += 1
 
-                    # Print validation result
                     self._print_validation_result(symbol, pred, target_time, closest_time, actual_price)
 
-            # Save updated predictions
             with open(validation_file, 'w') as f:
                 json.dump(predictions, f, indent=4)
 
-            # Calculate and save metrics
             if validated_count > 0:
                 metrics = self._calculate_metrics(predictions)
                 self._save_metrics(symbol, metrics)

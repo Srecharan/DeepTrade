@@ -13,35 +13,35 @@ class TradingStrategy:
         
         self.et_tz = timezone('US/Eastern') 
         # Risk Management
-        self.max_positions = 2              # Maximum concurrent positions
-        self.position_size = 0.02           # 2% of capital per trade
-        self.max_daily_risk = 0.02          # Maximum 2% account risk per day
-        self.max_trade_risk = 0.01          # Maximum 1% risk per trade
-        self.max_stop_loss = 0.03           # Maximum 3% stop loss
-        self.min_stop_loss = 0.01           # Minimum 1% stop loss
+        self.max_positions = 2              
+        self.position_size = 0.02           
+        self.max_daily_risk = 0.02          
+        self.max_trade_risk = 0.01          
+        self.max_stop_loss = 0.03           
+        self.min_stop_loss = 0.01           
         
         # Entry Conditions
-        self.confidence_threshold = 0.90     # Minimum 90% confidence
-        self.min_expected_return = 0.005    # Minimum 0.5% expected return
-        self.min_time_between_trades = 30   # Minutes between trades
-        self.max_trades_per_day = 3         # Maximum trades per day
+        self.confidence_threshold = 0.90     
+        self.min_expected_return = 0.005    
+        self.min_time_between_trades = 30   
+        self.max_trades_per_day = 3         
         
         # Technical Parameters
-        self.required_trend_strength = 0.7   # 70% of indicators must be positive
-        self.min_volume_percentile = 40     # Minimum volume requirement
-        self.rsi_oversold = 30              # RSI oversold threshold
-        self.rsi_overbought = 70            # RSI overbought threshold
+        self.required_trend_strength = 0.7   
+        self.min_volume_percentile = 40    
+        self.rsi_oversold = 30             
+        self.rsi_overbought = 70            
         
         # Exit Parameters
-        self.stop_loss_pct = 0.015          # Default 1.5% stop loss
-        self.take_profit_pct = 0.03         # Default 3% take profit
-        self.trailing_stop_pct = 0.005      # 0.5% trailing stop once in profit
+        self.stop_loss_pct = 0.015         
+        self.take_profit_pct = 0.03         
+        self.trailing_stop_pct = 0.005      
         
         # Time-based Rules
-        self.avoid_first_30min = True       # Avoid first 30 minutes of market
-        self.avoid_last_30min = True        # Avoid last 30 minutes of market
-        self.min_trade_holding = 5          # Minimum hold time (minutes)
-        self.max_trade_holding = 180        # Maximum hold time (minutes)
+        self.avoid_first_30min = True      
+        self.avoid_last_30min = True        
+        self.min_trade_holding = 5         
+        self.max_trade_holding = 180        
         
         # Initialize components
         self.prediction_system = prediction_system
@@ -191,10 +191,8 @@ class TradingStrategy:
             sma20_above_sma50 = sma20 > sma50
             rsi_bullish = rsi > 50
             
-            # Count how many trend indicators are bullish
             bullish_count = sum([above_sma20, sma20_above_sma50, rsi_bullish])
             
-            # Return True if at least 2 indicators are bullish
             return bullish_count >= 2, f"Bullish indicators: {bullish_count}/3"
                 
         except Exception as e:
@@ -367,7 +365,6 @@ class TradingStrategy:
             
     def get_performance_metrics(self) -> Dict:
         """Enhanced performance metrics with consistent naming"""
-        # Base metrics
         metrics = {
             'total_trades': len(self.trades_history),
             'profitable_trades': len([t for t in self.trades_history if t['profit_loss'] > 0]),
@@ -375,7 +372,6 @@ class TradingStrategy:
             'open_positions': len(self.positions)
         }
         
-        # Calculate win rate
         metrics['win_rate'] = (metrics['profitable_trades'] / metrics['total_trades'] 
                             if metrics['total_trades'] > 0 else 0)
         
@@ -413,9 +409,7 @@ class TradingStrategy:
         except Exception as e:
             print(f"Error getting price for {symbol}: {str(e)}")
             return None
-        
 
-    # In TradingStrategy._find_support_resistance:
     def _find_support_resistance(self, data: pd.DataFrame, timeframe: str) -> Tuple[float, float]:
         if len(data) < 20:  # If not enough data
             return data['Low'].min(), data['High'].max()
@@ -572,11 +566,9 @@ class TradingStrategy:
         daily_trend = analysis['1d']['trend']
         hourly_trend = analysis['1h']['trend']
         
-        # Check if daily and hourly are both up or both down
         daily_bullish = 'uptrend' in daily_trend
         hourly_bullish = 'uptrend' in hourly_trend
         
-        # If both timeframes agree, consider it aligned
         aligned = (daily_bullish and hourly_bullish) or (not daily_bullish and not hourly_bullish)
         
         print(f"\nTrend Alignment:")

@@ -38,7 +38,6 @@ class PaperTradingSimulation:
                 'Authorization': f'Bearer {self.tradier_token}',
                 'Accept': 'application/json'
             }
-            # Verify Tradier connection on initialization
             self._verify_tradier_connection()
         
         # Performance tracking
@@ -49,7 +48,7 @@ class PaperTradingSimulation:
     def _verify_tradier_connection(self) -> None:
         """Verify Tradier connection and print account details"""
         try:
-            # Get account information
+    
             response = requests.get(
                 f'{self.tradier_endpoint}/user/profile',
                 headers=self.tradier_headers
@@ -78,11 +77,9 @@ class PaperTradingSimulation:
     def _execute_tradier_trade(self, action: str, symbol: str, quantity: int) -> Dict:
         """Execute trade with improved short position handling"""
         try:
-            # Handle short positions correctly
             is_short = quantity < 0
             abs_quantity = abs(quantity)
             
-            # Determine correct side based on action and position type
             if action == 'ENTER':
                 side = 'sell_short' if is_short else 'buy'
             else:  # EXIT
@@ -247,16 +244,16 @@ class PaperTradingSimulation:
                                 elif isinstance(position_info, dict):
                                     current_positions = [position_info]
                     
-                    # Filter positions
+      
                     current_positions = [p for p in current_positions if p['symbol'] in self.symbols]
                     
                     print(f"\nActive positions for monitored symbols: {len(current_positions)}")
                     
-                    # Process existing positions
+            
                     for position in current_positions:
                         self._process_position(position)
                     
-                    # Look for new entry opportunities
+                
                     current_symbols = [p['symbol'] for p in current_positions]
                     account_balance = self._get_tradier_account_balance()
                     
@@ -311,7 +308,7 @@ class PaperTradingSimulation:
                     print(traceback.format_exc())
                     time.sleep(5)
 
-            # After the loop ends
+        
             print("\n🔔 SESSION COMPLETE")
             positions_response = self._get_tradier_positions()
             if positions_response and 'positions' in positions_response:
@@ -323,8 +320,7 @@ class PaperTradingSimulation:
                     for position in current_positions:
                         if position['symbol'] in self.symbols:
                             self._process_position(position)
-            
-            # Get and format final results
+       
             final_results = self.get_simulation_results()
             final_results['initial_capital'] = self.trading_strategy.initial_capital
             final_results['symbols'] = self.symbols
@@ -380,8 +376,7 @@ class PaperTradingSimulation:
                     
                 # Check positions that might need to exit
                 self._check_exits()
-                
-                # Look for new entry opportunities
+             
                 for symbol in self.symbols:
                     if (current_time - last_check[symbol]).total_seconds() < check_interval:
                         continue
@@ -447,12 +442,10 @@ class PaperTradingSimulation:
             account_balance = self._get_tradier_account_balance()
             positions_response = self._get_tradier_positions()
             order_history = self._get_tradier_order_history()
-            
-            # Process all trades (both historical and current session)
+                       
             all_trades = []
             
-            # Process order history into trades
-            trade_pairs = {}  # To match entries with exits
+            trade_pairs = {}  
             for order in order_history:
                 symbol = order['symbol']
                 if symbol not in trade_pairs:
@@ -508,14 +501,11 @@ class PaperTradingSimulation:
                             'profit_loss_pct': profit_loss_pct
                         }
                         all_trades.append(trade)
-                
-            # Add current session trades
+            
             all_trades.extend(self.trades_log)
-            
-            # Sort by exit time
+       
             all_trades.sort(key=lambda x: x['exit_time'] if x.get('exit_time') else datetime.now(self.et_tz), reverse=True)
-            
-            # Get current positions
+      
             current_positions = []
             if positions_response and 'positions' in positions_response:
                 if isinstance(positions_response['positions'], dict):
@@ -526,16 +516,13 @@ class PaperTradingSimulation:
                         else:
                             current_positions = position_data
             
-            # Update current prices for positions
             if current_positions:
                 self._update_position_prices(current_positions)
-            
-            # Calculate metrics
+
             closed_trades = [t for t in all_trades if t['action'] == 'EXIT']
             profitable_trades = len([t for t in closed_trades if t.get('profit_loss', 0) > 0])
             total_trades = len(closed_trades)
             
-            # Calculate total P&L including unrealized gains
             total_pl = account_balance - self.initial_capital
             
             return {
@@ -574,7 +561,6 @@ class PaperTradingSimulation:
         import matplotlib.pyplot as plt
         import seaborn as sns
         
-        # Create figure with subplots
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 15))
         
         # 1. Equity Curve
@@ -611,7 +597,6 @@ class PaperTradingSimulation:
             'Total Trades': results['total_trades']
         }
         
-        # Create a text summary
         metrics_text = '\n'.join([f"{k}: {v}" for k, v in metrics.items()])
         ax3.text(0.1, 0.5, metrics_text, fontsize=12, ha='left', va='center')
         ax3.set_title('Performance Summary')
@@ -661,10 +646,8 @@ class PaperTradingSimulation:
                 'holding_time': data.get('holding_time', 0)
             }
             
-            # Store in trade history
             self.trades_log.append(trade_log)
-                
-            # Print trade confirmation
+
             if action == 'ENTER':
                 print(f"\n🔵 ENTRY - {symbol}")
                 print(f"Time: {trade_log['entry_time'].strftime('%H:%M:%S ET')}")
@@ -687,12 +670,10 @@ class PaperTradingSimulation:
     def _process_position(self, position: Dict) -> None:
         """Process position with improved P&L calculation"""
         try:
-            # Extract position details
             symbol = position['symbol']
             quantity = float(position['quantity'])
             cost_basis = float(position['cost_basis']) / abs(quantity)  # Use abs for correct per-share cost
             
-            # Handle entry time
             if isinstance(position.get('date_acquired'), str):
                 entry_time_str = position['date_acquired'].replace('Z', '+00:00')
                 entry_time = datetime.fromisoformat(entry_time_str).astimezone(self.et_tz)
@@ -724,7 +705,6 @@ class PaperTradingSimulation:
             print(f"\nPosition Performance:")
             print(f"Unrealized P&L: ${unrealized_pl:.2f} ({unrealized_pl_pct:+.2f}%)")
             
-            # Calculate correct stop loss and take profit levels
             is_short = quantity < 0
             stop_loss = cost_basis * (1 + self.trading_strategy.stop_loss_pct) if is_short else cost_basis * (1 - self.trading_strategy.stop_loss_pct)
             take_profit = cost_basis * (1 - self.trading_strategy.take_profit_pct) if is_short else cost_basis * (1 + self.trading_strategy.take_profit_pct)
@@ -801,17 +781,14 @@ class PaperTradingSimulation:
                 f'{self.tradier_endpoint}/accounts/{self.tradier_account}/orders',
                 headers=self.tradier_headers
             )
-            response.raise_for_status()
-            
+            response.raise_for_status()          
             orders = response.json().get('orders', {}).get('order', [])
             if not isinstance(orders, list):
                 orders = [orders] if orders else []
             
-            # Convert to list if single order
             if isinstance(orders, dict):
                 orders = [orders]
                 
-            # Process each order
             processed_orders = []
             for order in orders:
                 if order.get('status') == 'filled':

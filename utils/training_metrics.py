@@ -24,10 +24,7 @@ class TrainingMetricsTracker:
         """Save metrics to JSON file"""
         filename = f"{self.metrics_dir}/{symbol}_{model_type}_metrics.json"
         
-        # Add timestamp
         metrics['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        # Save metrics
         with open(filename, 'w') as f:
             json.dump(metrics, f, indent=4)
     

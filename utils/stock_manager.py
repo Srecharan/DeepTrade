@@ -50,7 +50,6 @@ class StockManager:
         self.tradier_token = self.tradier_config['token']
         self.tradier_endpoint = self.tradier_config['endpoint']
         
-        # Price caching with TTL
         self.price_cache = {}
         self.cache_ttl = 60 
         
@@ -119,8 +118,7 @@ class StockManager:
         low_14 = data['Low'].rolling(window=14).min()
         data['%K'] = (data['Close'] - low_14) / (high_14 - low_14) * 100
         data['%D'] = data['%K'].rolling(window=3).mean()
-        
-        # On-Balance Volume (OBV)
+
         data['OBV'] = (data['Volume'] * (~data['Close'].diff().le(0) * 2 - 1)).cumsum()
         
         # Price Rate of Change (ROC)
@@ -303,7 +301,6 @@ class StockManager:
                 print(f"Using cached sentiment for {symbol}")
                 return self.sentiment_cache[symbol]
                 
-            # If not in cache, get new sentiment
             headlines = get_financial_news(symbol, days, api_key=NEWS_API_KEY)
             
             if not headlines:
@@ -369,7 +366,6 @@ class StockManager:
 
     def add_basic_indicators(self, data: pd.DataFrame) -> pd.DataFrame:
         """Add basic technical indicators"""
-        # Bollinger Bands
         data['BB_middle'] = data['Close'].rolling(window=20).mean()
         data['BB_upper'] = data['BB_middle'] + 2 * data['Close'].rolling(window=20).std()
         data['BB_lower'] = data['BB_middle'] - 2 * data['Close'].rolling(window=20).std()
@@ -392,8 +388,6 @@ class StockManager:
         data['ATR'] = true_range.rolling(14).mean()
         
         return data    
-    
-    # Update this method in stock_manager.py
 
     def prepare_sentiment_features(self, data: pd.DataFrame, symbol: str, 
                      use_cached_sentiment: bool = False, 
@@ -415,7 +409,6 @@ class StockManager:
         data['sentiment_7d'] = data['raw_sentiment'].rolling(window=7, min_periods=1).mean()
         data['sentiment_momentum'] = data['sentiment_3d'] - data['sentiment_7d']
         
-        # Additional sentiment features
         data['sentiment_volume'] = data['raw_sentiment'] * data['Volume'].pct_change().fillna(0)
         data['sentiment_acceleration'] = data['sentiment_momentum'].diff().fillna(0)
         data['sentiment_regime'] = data['raw_sentiment'].rolling(window=5).std().fillna(0)
@@ -483,18 +476,12 @@ class StockManager:
 
     def enhance_sentiment_features(self, data: pd.DataFrame) -> pd.DataFrame:
         """Add balanced sentiment indicators with controlled scaling"""
-        # Cap the volume changes to prevent extreme values
         volume_change = data['Volume'].pct_change().clip(-1, 1)  # Limit to ±100%
         data['sentiment_volume'] = data['raw_sentiment'] * np.log1p(np.abs(volume_change)) * np.sign(volume_change)
         
-        # Use rolling changes instead of point-to-point for smoother acceleration
         data['sentiment_acceleration'] = data['sentiment_momentum'].diff().rolling(3).mean()
-        
-        # Scale regime changes relative to the mean
         sentiment_std = data['sentiment_rsi'].rolling(5).std()
         data['sentiment_regime'] = sentiment_std / sentiment_std.rolling(20).mean().fillna(1)
-        
-        # Use absolute changes for trend strength
         data['sentiment_trend_strength'] = data['sentiment_trend'].abs().rolling(5).mean()
         
         return data
@@ -533,14 +520,13 @@ class StockManager:
         low = data['Low']
         close = data['Close']
         
-        # Calculate True Range
         tr1 = high - low
         tr2 = abs(high - close.shift())
         tr3 = abs(low - close.shift())
         tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
         atr = tr.rolling(period).mean()
         
-        # Calculate Plus and Minus Directional Movement
+        # Calculate Directional Movement
         pdm = (high - high.shift()).clip(lower=0)
         ndm = (low.shift() - low).clip(lower=0)
         
@@ -653,7 +639,6 @@ class StockManager:
         except Exception as e:
             print(f"Error getting market status: {str(e)}")
             
-        # Fallback to basic check
         return {'is_open': self._is_market_hours()}
     
     def _is_market_hours(self) -> bool:
@@ -664,11 +649,10 @@ class StockManager:
         now = datetime.now(self.et_tz)
         current_time = now.time()
         
-        # Market hours: 9:30 AM - 4:00 PM Eastern Time
+        # Market hours
         market_open = datetime.strptime('9:30', '%H:%M').time()
         market_close = datetime.strptime('16:00', '%H:%M').time()
         
-        # Check if it's a weekday and within market hours
         return (
             now.weekday() < 5 and
             market_open <= current_time <= market_close
@@ -682,7 +666,6 @@ class StockManager:
         now = datetime.now(self.et_tz)
         price_time = price_data['timestamp']
         
-        # Convert naive timestamp to aware if needed
         if price_time.tzinfo is None:
             price_time = self.et_tz.localize(price_time)
             

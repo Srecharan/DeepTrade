@@ -1,4 +1,5 @@
 # utils/intraday_predictor.py
+#Not using this anywhere
 import numpy as np
 import pandas as pd
 from typing import Dict
@@ -22,29 +23,24 @@ class IntradayPredictor:
         
     def adjust_prediction(self, symbol: str, current_data: Dict) -> Dict:
         """Adjust base prediction using intraday patterns"""
-        # Initialize or update intraday data
         if symbol not in self.intraday_data:
             self.intraday_data[symbol] = []
         
         self.intraday_data[symbol].append(current_data)
-        
-        # Keep only last 30 minutes of data
+
         cutoff_time = pd.Timestamp.now() - timedelta(minutes=30)
         self.intraday_data[symbol] = [
             d for d in self.intraday_data[symbol] 
             if d['timestamp'] > cutoff_time
         ]
-        
-        # Get base prediction
+
         base_pred = self.base_predictor.predict(symbol)
         
-        if len(self.intraday_data[symbol]) < 5:  # Need minimum data points
+        if len(self.intraday_data[symbol]) < 5:  
             return base_pred
             
-        # Create DataFrame from intraday data
         df = pd.DataFrame(self.intraday_data[symbol])
-        
-        # Calculate intraday metrics
+
         vwap = self.calculate_vwap(df)
         momentum = self.calculate_price_momentum(df)
         volatility = df['price'].std() / df['price'].mean()
@@ -52,24 +48,18 @@ class IntradayPredictor:
         # Adjust prediction
         price_adjustment = 0.0
         
-        # VWAP-based adjustment
         current_price = df['price'].iloc[-1]
         vwap_diff = (current_price - vwap) / vwap
-        price_adjustment += vwap_diff * 0.3  # 30% weight to VWAP
+        price_adjustment += vwap_diff * 0.3  
         
-        # Momentum-based adjustment
-        price_adjustment += momentum * 0.4  # 40% weight to momentum
+        price_adjustment += momentum * 0.4  
         
-        # Volatility dampening
-        price_adjustment *= (1 - volatility)  # Reduce adjustment in high volatility
-        
-        # Apply adjustments to predictions
+        price_adjustment *= (1 - volatility)  
         adjusted_predictions = base_pred.copy()
         for key in ['lstm', 'xgboost', 'ensemble']:
             if key in adjusted_predictions:
                 adjusted_predictions[key] *= (1 + price_adjustment)
                 
-        # Recalculate confidence based on volatility
         if 'risk_metrics' in adjusted_predictions:
             conf_adjustment = max(0, 1 - volatility * 2)
             adjusted_predictions['risk_metrics']['confidence_score'] *= conf_adjustment

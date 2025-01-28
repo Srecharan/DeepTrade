@@ -20,7 +20,6 @@ def visualize_sentiment_analysis(df: pd.DataFrame, symbols: List[str]):
     plt.style.use('seaborn')
     fig = plt.figure(figsize=(15, 10))
     
-    # 1. Create GridSpec for multiple plots
     gs = plt.GridSpec(2, 2, figure=fig)
     
     # Plot 1: Multi-source Sentiment Comparison
@@ -113,10 +112,7 @@ def test_comprehensive_sentiment():
         user_agent=REDDIT_USER_AGENT
     )
     
-    # Symbols to analyze
     symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN']
-    
-    # Store results for each source
     results = []
     
     print("\n" + "="*50)
@@ -127,11 +123,9 @@ def test_comprehensive_sentiment():
         try:
             print(f"\n{'-'*20} Analyzing {symbol} {'-'*20}")
             
-            # 1. News Sentiment
             print("\n1. News Sentiment Analysis:")
             news_sentiment = stock_manager.analyze_sentiment(symbol)
             
-            # 2. Reddit Sentiment
             print("\n2. Reddit Sentiment Analysis:")
             reddit_df = reddit_analyzer.analyze_stock_sentiment(symbol)
             reddit_sentiment = reddit_df['total_sentiment'].mean() if reddit_df is not None else 0
@@ -144,7 +138,6 @@ def test_comprehensive_sentiment():
                     print(f"  Sentiment: {post['total_sentiment']:.2f}")
                     print(f"  Engagement: {post['engagement']}")
             
-            # 3. SEC Sentiment
             print("\n3. SEC Filings Analysis:")
             sec_analysis = sec_collector.analyze_filings(symbol)
             
@@ -153,10 +146,8 @@ def test_comprehensive_sentiment():
                 for form in sec_analysis['important_forms'][:3]:
                     print(f"- {form['date']}: {form['type']}")
             
-            # 4. Combined Sentiment
             combined = stock_manager.get_combined_sentiment(symbol)
             
-            # Store all results
             results.append({
                 'Symbol': symbol,
                 'News Sentiment': news_sentiment,
@@ -167,7 +158,6 @@ def test_comprehensive_sentiment():
                 'Confidence': sec_analysis['confidence']
             })
             
-            # 5. Store in Sentiment Manager
             sentiment_manager.store_daily_sentiment(
                 symbol,
                 combined['combined_score'],
@@ -178,19 +168,16 @@ def test_comprehensive_sentiment():
             print(f"Error analyzing {symbol}: {str(e)}")
             continue
     
-    # Print summary table
     if results:
         df = pd.DataFrame(results)
         df = df.round(3)
         
-        # Print summary table
         print("\n" + "="*50)
         print("SENTIMENT ANALYSIS SUMMARY")
         print("="*50)
         
         print("\n" + tabulate(df, headers='keys', tablefmt='grid', showindex=False))
         
-        # Additional Statistics
         print("\nSentiment Statistics:")
         print("-" * 30)
         print(f"Most Positive: {df.loc[df['Combined Score'].idxmax(), 'Symbol']} ({df['Combined Score'].max():.3f})")
@@ -198,7 +185,6 @@ def test_comprehensive_sentiment():
         print(f"Average Sentiment: {df['Combined Score'].mean():.3f}")
         print(f"Sentiment Volatility: {df['Combined Score'].std():.3f}")
         
-        # Save results
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         df.to_csv(f'data/sentiment/sentiment_analysis_{timestamp}.csv', index=False)
         print(f"\nResults saved to: sentiment_analysis_{timestamp}.csv")
@@ -207,10 +193,8 @@ def test_comprehensive_sentiment():
     return None
 
 if __name__ == "__main__":
-    # Run the main analysis
     results_df = test_comprehensive_sentiment()
     
-    # Only proceed with visualization if we have results
     if results_df is not None:
         symbols = ['NVDA', 'AAPL', 'MSFT', 'GME', 'AMD', 'JNJ', 'META', 'GOOGL', 'AMZN']
         visualize_sentiment_analysis(results_df, symbols)

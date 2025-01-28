@@ -32,7 +32,6 @@ class TimeSeriesDataset(Dataset):
             self.sequences.append(seq)
             self.targets.append(target)
             
-        # Convert to tensors and move to GPU
         self.sequences = torch.FloatTensor(self.sequences).cuda()  # Move to GPU
         self.targets = torch.FloatTensor(self.targets).cuda()     # Move to GPU
         
@@ -54,10 +53,9 @@ class EnhancedLSTM(nn.Module):
             num_layers=num_layers,
             batch_first=True,
             dropout=dropout,
-            bidirectional=True  # Keep this
+            bidirectional=True  
         )
 
-        # Add batch normalization
         self.batch_norm = nn.BatchNorm1d(hidden_size * 2)
         self.attention = nn.Sequential(
             nn.Linear(hidden_size * 2, hidden_size),
@@ -67,10 +65,10 @@ class EnhancedLSTM(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(hidden_size * 2, hidden_size),
             nn.ReLU(),
-            nn.Dropout(0.2),  # Reduced dropout
+            nn.Dropout(0.2),  
             nn.Linear(hidden_size, hidden_size // 2),
             nn.ReLU(),
-            nn.Dropout(0.2),  # Reduced dropout
+            nn.Dropout(0.2),  
             nn.Linear(hidden_size // 2, 1)
         )
         
@@ -84,14 +82,13 @@ class EnhancedLSTM(nn.Module):
         lstm_out = self.batch_norm(lstm_out)
         lstm_out = lstm_out.reshape(batch_size, seq_len, hidden_dim)
         
-        # Multi-head attention
         attention_weights = F.softmax(
             self.attention(lstm_out).transpose(1, 2), 
             dim=2
         )
         context_vector = torch.bmm(attention_weights, lstm_out)
         
-        # Residual connection
+
         context_vector = context_vector.squeeze(1) + lstm_out[:, -1, :]
         
         return self.fc(context_vector)
@@ -124,12 +121,12 @@ class ModelTrainer:
         config = self.config['lstm']
         
         config = {
-            'hidden_size': 256,       # Standard size for all stocks
-            'num_layers': 3,          # Standard 3 layers
-            'learning_rate': 0.0003,  # Standard learning rate
-            'batch_size': 32,         # Standard batch size
-            'epochs': 200,            # Standard epochs
-            'sequence_length': 30     # Standard sequence length
+            'hidden_size': 256,       
+            'num_layers': 3,          
+            'learning_rate': 0.0003,  
+            'batch_size': 32,        
+            'epochs': 200,            
+            'sequence_length': 30     
         }
 
         # 1. Improved data splitting
@@ -160,7 +157,7 @@ class ModelTrainer:
             input_size=input_size,
             hidden_size=config['hidden_size'],
             num_layers=config['num_layers'],
-            dropout=0.3  # Standard dropout for all stocks
+            dropout=0.3  
         ).cuda()
         
         # 4. Standard loss function for all stocks
@@ -174,8 +171,8 @@ class ModelTrainer:
         
         # 6. Early stopping with standard parameters
         best_val_loss = float('inf')
-        patience = 30  # Standard patience
-        min_epochs = 40  # Standard minimum epochs
+        patience = 30 
+        min_epochs = 40  
         patience_counter = 0
         best_model_state = None
                 
@@ -184,7 +181,7 @@ class ModelTrainer:
             # Training phase
             model.train()
             train_loss = 0
-            accumulation_steps = 4  # Standard accumulation steps
+            accumulation_steps = 4 
             optimizer.zero_grad()
             
             for batch_idx, (sequences, targets) in enumerate(train_dataloader):
@@ -213,7 +210,6 @@ class ModelTrainer:
             
             avg_val_loss = val_loss / len(val_dataloader)
             
-            # Print progress
             if (epoch + 1) % 10 == 0:
                 print(f'Epoch [{epoch+1}/{config["epochs"]}], '
                       f'Train Loss: {avg_train_loss:.4f}, '
@@ -237,7 +233,6 @@ class ModelTrainer:
             history['train_loss'].append(avg_train_loss)
             history['val_loss'].append(avg_val_loss)
 
-        # Load best model state
         if best_model_state is not None:
             model.load_state_dict(best_model_state)
             torch.save(best_model_state, f'models/trained/{symbol}_lstm_best.pth')
@@ -314,14 +309,14 @@ class ModelTrainer:
         
         try:
             # Set up cross-validation with fixed window
-            window_size = 30  # Prediction window size
+            window_size = 30  
             cv_scores_lstm = []
             cv_scores_xgb = []
             
-            # Create fixed-size validation windows
+
             total_samples = len(X)
             n_splits = 5
-            val_size = window_size * 2  # Double window size for validation
+            val_size = window_size * 2  
             
             for fold in range(n_splits):
                 split_idx = total_samples - (n_splits - fold) * val_size
@@ -345,7 +340,7 @@ class ModelTrainer:
                 lstm_preds = []
                 xgb_preds = []
                 
-                # Predict using sliding window
+          
                 lstm_model.eval()  # Set to evaluation mode
                 with torch.no_grad():
                     for i in range(len(X_val) - window_size + 1):
@@ -355,11 +350,11 @@ class ModelTrainer:
                         lstm_pred = lstm_model(seq).cpu().item()
                         lstm_preds.append(lstm_pred)
                         
-                        # XGBoost prediction (remains on CPU)
+                        # XGBoost prediction 
                         xgb_pred = xgb_model.predict(X_window[-1:])
                         xgb_preds.append(xgb_pred[0])
                 
-                # Calculate scores
+           
                 y_true = y_val[window_size-1:]
                 lstm_score = np.mean(np.abs(np.array(lstm_preds) - y_true))
                 xgb_score = np.mean(np.abs(np.array(xgb_preds) - y_true))
@@ -393,7 +388,6 @@ class ModelTrainer:
     def save_models(self, symbol: str):
         """Save both LSTM and XGBoost models"""
         try:
-            # Create models directory if it doesn't exist
             os.makedirs('models', exist_ok=True)
             
             # Save LSTM model
@@ -419,7 +413,6 @@ class ModelTrainer:
             print(f"Error saving models: {str(e)}")
             raise e
     
-    # Add to model_trainer.py
     def save_model_version(self, symbol: str, model_type: str, metrics: Dict):
         """Save model version with metadata"""
         version_info = {
@@ -432,7 +425,6 @@ class ModelTrainer:
         version_path = f'models/trained/versions/{symbol}/{model_type}/'
         os.makedirs(version_path, exist_ok=True)
         
-        # Save version info
         with open(f'{version_path}/v{version_info["version"]}_info.json', 'w') as f:
             json.dump(version_info, f, indent=4)
         

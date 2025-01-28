@@ -10,12 +10,10 @@ def test_stock_predictions():
     for symbol in symbols:
         print(f"\n=== Analyzing {symbol} ===")
         try:
-            # Get headlines directly to verify API
             headlines = manager._get_recent_headlines(symbol, 7)
             print(f"\nRecent Headlines for {symbol}:")
             for i, headline in enumerate(headlines[:5], 1):
                 print(f"{i}. {headline}")
-            # Fetch and prepare data
             data, sentiment = manager.prepare_prediction_data(symbol)
             
             print(f"Sentiment score: {sentiment:.2f}")
@@ -24,11 +22,9 @@ def test_stock_predictions():
             print(f"- MACD: {data['MACD'].iloc[-1]:.2f}")
             print(f"- SMA_20: {data['SMA_20'].iloc[-1]:.2f}")
             print(f"Data shape: {data.shape}")
-            
-            # Plot the stock prices
+
             plt.plot(data.index, data['Close'], label=symbol)
-            
-            # Print some technical indicators
+
             print(f"Latest RSI: {data['RSI'].iloc[-1]:.2f}")
             print(f"Latest MACD: {data['MACD'].iloc[-1]:.2f}")
             print(f"Latest SMA_20: {data['SMA_20'].iloc[-1]:.2f}")
