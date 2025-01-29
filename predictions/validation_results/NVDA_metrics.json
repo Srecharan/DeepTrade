@@ -1,38 +1,38 @@
 {
     "5min": {
-        "sample_size": 43,
-        "mean_absolute_error": 0.6912231633986715,
-        "median_error": 0.5195950246278752,
-        "max_error": 3.293160906102819,
-        "direction_accuracy": 53.48837209302325,
-        "ci_coverage": 13.953488372093023,
-        "error_std": 0.6972624718649352
+        "sample_size": 106,
+        "mean_absolute_error": 1.1992236555908977,
+        "median_error": 0.5132861001344806,
+        "max_error": 7.915528320992325,
+        "direction_accuracy": 41.509433962264154,
+        "ci_coverage": 16.9811320754717,
+        "error_std": 1.9745300785854971
     },
     "15min": {
-        "sample_size": 39,
-        "mean_absolute_error": 0.6235032792156353,
-        "median_error": 0.42153530708905457,
-        "max_error": 2.379041984650209,
-        "direction_accuracy": 64.1025641025641,
-        "ci_coverage": 20.51282051282051,
-        "error_std": 0.5505661090278798
+        "sample_size": 101,
+        "mean_absolute_error": 1.0939569097378579,
+        "median_error": 0.5263509808424077,
+        "max_error": 7.674427569597765,
+        "direction_accuracy": 48.51485148514851,
+        "ci_coverage": 28.71287128712871,
+        "error_std": 1.7610296905937353
     },
     "30min": {
-        "sample_size": 35,
-        "mean_absolute_error": 0.7822744597931013,
-        "median_error": 0.7677412487296267,
-        "max_error": 1.8889222705502084,
-        "direction_accuracy": 60.0,
-        "ci_coverage": 11.428571428571429,
-        "error_std": 0.4533797614184224
+        "sample_size": 95,
+        "mean_absolute_error": 1.0946964606035423,
+        "median_error": 0.6694369068787874,
+        "max_error": 8.33238497796604,
+        "direction_accuracy": 45.26315789473684,
+        "ci_coverage": 26.31578947368421,
+        "error_std": 1.6392216952640113
     },
     "1h": {
-        "sample_size": 29,
-        "mean_absolute_error": 0.9422279741337346,
-        "median_error": 0.9843384479629584,
-        "max_error": 2.104797144943944,
-        "direction_accuracy": 82.75862068965517,
-        "ci_coverage": 24.137931034482758,
-        "error_std": 0.572973764626718
+        "sample_size": 81,
+        "mean_absolute_error": 1.27329605277694,
+        "median_error": 0.8818704498124741,
+        "max_error": 8.046350139321248,
+        "direction_accuracy": 49.382716049382715,
+        "ci_coverage": 32.098765432098766,
+        "error_std": 1.6064791544285542
     }
 }
