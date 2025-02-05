@@ -35,8 +35,38 @@ The prediction system employs an ensemble approach combining:
   - Advanced feature engineering
   - Dynamic weighting based on performance
 
-![Stock Predictions](visualization/stock_prediction_collage.png)
-*Multi-timeframe predictions across different stocks showing price action and confidence intervals*
+<!-- ![Stock Predictions](visualization/stock_prediction_collage.png)
+*Multi-timeframe predictions across different stocks showing price action and confidence intervals* -->
+
+<div align="center">
+  <table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td>
+        <img src="visualization/AAPL_prediction.png" alt="AAPL Prediction" width="400"/>
+      </td>
+      <td>
+        <img src="visualization/AMD_prediction.png" alt="AMD Prediction" width="400"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="visualization/GME_prediction.png" alt="GME Prediction" width="400"/>
+      </td>
+      <td>
+        <img src="visualization/MSFT_prediction.png" alt="MSFT Prediction" width="400"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="visualization/NVDA_prediction.png" alt="NVDA Prediction" width="400"/>
+      </td>
+      <td>
+        <img src="visualization/JNJ_prediction.png" alt="JNJ Prediction" width="400"/>
+      </td>
+    </tr>
+  </table>
+  <p><em>Multi-timeframe predictions across different stocks showing price action and confidence intervals</em></p>
+</div>
 
 ### Training Process
 The model training pipeline includes:
@@ -62,8 +92,38 @@ The model training pipeline includes:
 
 The metrics represent Mean Absolute Error (MAE) on normalized returns. Model training uses a sliding window approach with dynamic batch sizes and learning rate adjustment based on validation performance.
 
-![Training History](visualization/stock_training_history_collage.png)
-*Training convergence showing loss metrics and validation performance*
+<!-- ![Training History](visualization/stock_training_history_collage.png)
+*Training convergence showing loss metrics and validation performance* -->
+
+<div align="center">
+  <table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td>
+        <img src="visualization/AAPL_training_history.png" alt="AAPL Training" width="400"/>
+      </td>
+      <td>
+        <img src="visualization/AMD_training_history.png" alt="AMD Training" width="400"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="visualization/GME_training_history.png" alt="GME Training" width="400"/>
+      </td>
+      <td>
+        <img src="visualization/MSFT_training_history.png" alt="MSFT Training" width="400"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="visualization/NVDA_training_history.png" alt="NVDA Training" width="400"/>
+      </td>
+      <td>
+        <img src="visualization/JNJ_training_history.png" alt="JNJ Training" width="400"/>
+      </td>
+    </tr>
+  </table>
+  <p><em>Training convergence showing loss metrics and validation performance across different stocks</em></p>
+</div>
 
 ## 2. Sentiment Analysis Pipeline
 
