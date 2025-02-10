@@ -317,9 +317,12 @@ python tests/unit/test_model_training.py
 ## Performance Metrics
 
 ### Price Prediction
-- Directional Accuracy: 82.76% (1-hour timeframe)
-- Mean Absolute Error: 0.73% (5-min predictions)
+- Directional Accuracy: 55-65% (across all timeframes)
+- Mean Absolute Error: 0.3-0.4% (across multiple stocks)
 - Confidence Scoring: 87-93%
+- Model Performance:
+  * LSTM Mean: 0.3630, Std: 0.1007
+  * XGBoost Mean: 0.1408, Std: 0.0622
 
 ### Sentiment Analysis
 - Coverage: 300+ daily news articles
