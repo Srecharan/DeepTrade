@@ -4,6 +4,12 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
+## 1-Min Overview
+
+[![Project Overview](https://img.youtube.com/vi/eRFWZjJbcgI/0.jpg)](https://youtu.be/eRFWZjJbcgI)
+*Technical overview of DeepTrade AI's architecture and implementation*
+
+
 ## System Architecture
 
 DeepTrade AI combines three powerful components to provide comprehensive stock market analysis and trading:
