@@ -6,9 +6,15 @@
 
 ## 1-Min Overview
 
-[![Project Overview](https://img.youtube.com/vi/eRFWZjJbcgI/0.jpg)](https://youtu.be/eRFWZjJbcgI)
-*Technical overview of DeepTrade AI's architecture and implementation*
-
+<div align="center">
+  <a href="https://youtu.be/eRFWZjJbcgI">
+    <img src="https://img.youtube.com/vi/eRFWZjJbcgI/maxresdefault.jpg" alt="Watch the video" style="width: 100%; max-width: 800px;">
+    <br>
+    <img src="https://img.shields.io/badge/Watch%20on-YouTube-red?style=for-the-badge&logo=youtube" alt="Watch on YouTube">
+  </a>
+  <br><br>
+  <em>Technical overview of DeepTrade AI's architecture and implementation</em>
+</div>
 
 ## System Architecture
 
