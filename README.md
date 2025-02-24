@@ -4,6 +4,17 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
+## 1-Min Overview
+
+<div align="center">
+  <a href="https://youtu.be/eRFWZjJbcgI">
+    <img src="https://img.youtube.com/vi/eRFWZjJbcgI/maxresdefault.jpg" alt="Watch the video" style="width: 100%; max-width: 800px;">
+    <br>
+    <img src="https://img.shields.io/badge/Watch%20on-YouTube-red?style=for-the-badge&logo=youtube" alt="Watch on YouTube">
+  </a>
+  <br><br>
+  <em>Technical overview of DeepTrade AI's architecture and implementation</em>
+</div>
 
 ## System Architecture
 
@@ -373,14 +384,3 @@ This project utilizes free tier API access for all integrations:
 - Reddit API: Basic rate limits apply
 - Real-time price fetching may experience delays due to free tier limitations
 
-## 1-Min Overview
-
-<div align="center">
-  <a href="https://youtu.be/eRFWZjJbcgI">
-    <img src="https://img.youtube.com/vi/eRFWZjJbcgI/maxresdefault.jpg" alt="Watch the video" style="width: 100%; max-width: 800px;">
-    <br>
-    <img src="https://img.shields.io/badge/Watch%20on-YouTube-red?style=for-the-badge&logo=youtube" alt="Watch on YouTube">
-  </a>
-  <br><br>
-  <em>Technical overview of DeepTrade AI's architecture and implementation</em>
-</div>
