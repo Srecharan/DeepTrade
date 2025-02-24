@@ -4,7 +4,7 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## 1-Min Overview
+## 1-min Overview
 
 <div align="center">
   <a href="https://youtu.be/eRFWZjJbcgI">
