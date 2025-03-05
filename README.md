@@ -4,36 +4,31 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## 1-min Overview
+## Overview
+
+DeepTrade AI combines advanced deep learning models and sentiment analysis to predict stock market movements and automate trading decisions. The system integrates multiple data sources with a hybrid LSTM-XGBoost architecture to provide accurate price forecasts across different timeframes.
 
 <div align="center">
-  <a href="https://youtu.be/eRFWZjJbcgI  #remove">
-    <img src="https://img.youtube.com/vi/eRFWZjJbcgI/maxresdefault.jpg #remove" alt="Watch the video" style="width: 100%; max-width: 800px;">
-    <br>
-    <img src="https://img.shields.io/badge/Watch%20on-YouTube-red?style=for-the-badge&logo=youtube" alt="Watch on YouTube">
+  <a href="visualization/DeepTrade AI_overview.pdf">
+    <img src="visualization/First_page.png" width="600" alt="DeepTrade AI Technical Overview"/>
+    <p><i>Click on the image to view the complete Technical Overview PDF</i></p>
   </a>
-  <br><br>
-  <em>Technical overview of DeepTrade AI's architecture and implementation</em>
 </div>
 
 ## System Architecture
 
-DeepTrade AI combines three powerful components to provide comprehensive stock market analysis and trading:
-
-1. **Advanced Stock Prediction Engine**: LSTM-XGBoost ensemble for multi-timeframe price predictions
-2. **Multi-Source Sentiment Analysis**: Real-time sentiment processing from news, Reddit, and SEC filings
-3. **Automated Trading System**: Paper trading simulation with Tradier integration
-
-### Technical Stack
-- **Deep Learning**: PyTorch with CUDA acceleration
-- **Machine Learning**: XGBoost, Scikit-learn
-- **NLP**: FinBERT for financial text analysis
-- **APIs**: Tradier, News API, Reddit API
-- **Data Processing**: Pandas, NumPy, SciPy
+<div align="center">
+  <img src="visualization/deeptrade_system.png" width="3000"/>
+  <p><i>DeepTrade AI system architecture showing data flow between components</i></p>
+</div>
 
 ## 1. Stock Prediction System
 
 ### Model Architecture
+<div align="center">
+  <img src="visualization/lstm_xgb.png" width="1000"/>
+  <p><i>LSTM and XGBoost model architectures with dynamic ensemble weighting</i></p>
+</div>
 The prediction system employs an ensemble approach combining:
 
 - **Enhanced LSTM Model**:
