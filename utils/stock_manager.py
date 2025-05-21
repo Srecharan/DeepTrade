@@ -77,7 +77,7 @@ class StockManager:
         }
         
     def fetch_stock_data(self, symbol: str, start_date: str, end_date: str, timeframe: str = '1d') -> pd.DataFrame:
-        """Fetch stock data with caching mechanism"""
+        """Fetch stock data with caching mechanism and MultiIndex handling"""
         cache_key = f"{symbol}_{start_date}_{end_date}_{timeframe}"
         
         try:
@@ -90,8 +90,14 @@ class StockManager:
                     '1h': '1h',
                     '1d': '1d'
                 }.get(timeframe, '1d')
-                
+                print(f"Fetching data for {symbol} from {start_date} to {end_date} (Interval: {interval})")
                 data = yf.download(symbol, start=start_date, end=end_date, interval=interval)
+                
+                # Fix MultiIndex if needed
+                if isinstance(data.columns, pd.MultiIndex):
+                    print("Converting MultiIndex to single-level columns")
+                    # Take the first level of the MultiIndex (Price level)
+                    data.columns = [col[0] for col in data.columns]
                 
                 # Fill missing volume with previous day's volume
                 if 'Volume' in data.columns:
@@ -106,86 +112,171 @@ class StockManager:
             return pd.DataFrame()
     
     def add_technical_indicators(self, data: pd.DataFrame) -> pd.DataFrame:
-        """Add comprehensive technical indicators"""
-        data['Volume_MA'] = data['Volume'].rolling(window=20).mean()
-        data['Volume_Ratio'] = data['Volume'] / data['Volume_MA']
-        data['SMA_20'] = data['Close'].rolling(window=20).mean()
-        # Existing indicators
-        data = self.add_basic_indicators(data)
+        """Add comprehensive technical indicators with safety checks"""
+        data = data.copy()
         
-        # Stochastic Oscillator
-        high_14 = data['High'].rolling(window=14).max()
-        low_14 = data['Low'].rolling(window=14).min()
-        data['%K'] = (data['Close'] - low_14) / (high_14 - low_14) * 100
-        data['%D'] = data['%K'].rolling(window=3).mean()
-
-        data['OBV'] = (data['Volume'] * (~data['Close'].diff().le(0) * 2 - 1)).cumsum()
+        # Check if Volume column exists, if not add it with zeros
+        if 'Volume' not in data.columns:
+            print("WARNING: Volume column is missing, adding default values")
+            data['Volume'] = 0
         
-        # Price Rate of Change (ROC)
-        data['ROC'] = data['Close'].pct_change(periods=12) * 100
+        # Fill missing or zero volume with a small default value
+        data['Volume'] = data['Volume'].replace(0, 1000)
         
-        # Additional Momentum Indicators
-        # Money Flow Index
-        typical_price = (data['High'] + data['Low'] + data['Close']) / 3
-        money_flow = typical_price * data['Volume']
-        pos_flow = money_flow.where(typical_price > typical_price.shift(1), 0).rolling(window=14).sum()
-        neg_flow = money_flow.where(typical_price < typical_price.shift(1), 0).rolling(window=14).sum()
-        data['MFI'] = 100 - (100 / (1 + pos_flow / neg_flow))
+        # Add Volume Moving Average with safety check
+        try:
+            data['Volume_MA'] = data['Volume'].rolling(window=20, min_periods=1).mean()
+        except Exception as e:
+            print(f"Error calculating Volume_MA: {e}")
+            data['Volume_MA'] = data['Volume']
+            
+        # Safe Volume Ratio calculation
+        try:
+            data['Volume_Ratio'] = data['Volume'] / data['Volume_MA'].replace(0, 1)
+        except Exception as e:
+            print(f"Error calculating Volume_Ratio: {e}")
+            data['Volume_Ratio'] = 1.0
+            
+        # SMA calculation with safety check
+        try:
+            data['SMA_20'] = data['Close'].rolling(window=20, min_periods=1).mean()
+        except Exception as e:
+            print(f"Error calculating SMA_20: {e}")
+            data['SMA_20'] = data['Close']
         
+        # Add basic indicators
+        try:
+            data = self.add_basic_indicators(data)
+        except Exception as e:
+            print(f"Error in add_basic_indicators: {e}")
+            # Add minimal required indicators if basic indicators fail
+            data['RSI'] = 50
+            data['MACD'] = 0
+            data['Signal_Line'] = 0
+            data['BB_upper'] = data['Close'] * 1.02
+            data['BB_lower'] = data['Close'] * 0.98
+            data['BB_middle'] = data['Close']
+            data['ATR'] = 1.0
+            data['OBV'] = 0
+            
+        # Add remaining indicators with safety checks
+        try:
+            # Stochastic Oscillator
+            high_14 = data['High'].rolling(window=14, min_periods=1).max()
+            low_14 = data['Low'].rolling(window=14, min_periods=1).min()
+            data['%K'] = (data['Close'] - low_14) / (high_14 - low_14 + 0.0001) * 100
+            data['%D'] = data['%K'].rolling(window=3, min_periods=1).mean()
+        except Exception as e:
+            print(f"Error calculating Stochastic: {e}")
+            data['%K'] = 50
+            data['%D'] = 50
+        
+        try:
+            # OBV with safety
+            price_diff = data['Close'].diff().fillna(0)
+            volume_sign = np.where(price_diff > 0, 1, np.where(price_diff < 0, -1, 0))
+            data['OBV'] = (data['Volume'] * volume_sign).cumsum()
+        except Exception as e:
+            print(f"Error calculating OBV: {e}")
+            data['OBV'] = 0
+            
+        try:
+            # ROC (Rate of Change)
+            data['ROC'] = data['Close'].pct_change(periods=12).fillna(0) * 100
+        except Exception as e:
+            print(f"Error calculating ROC: {e}")
+            data['ROC'] = 0
+            
+        try:
+            # Money Flow Index
+            typical_price = (data['High'] + data['Low'] + data['Close']) / 3
+            money_flow = typical_price * data['Volume']
+            
+            # Safe logic for positive and negative flow
+            price_diff = typical_price.diff().fillna(0)
+            pos_flow = money_flow.where(price_diff > 0, 0).rolling(window=14, min_periods=1).sum()
+            neg_flow = money_flow.where(price_diff < 0, 0).rolling(window=14, min_periods=1).sum().abs()
+            
+            # Safe MFI calculation avoiding division by zero
+            data['MFI'] = 100 - (100 / (1 + pos_flow / neg_flow.replace(0, 1)))
+        except Exception as e:
+            print(f"Error calculating MFI: {e}")
+            data['MFI'] = 50
+        
+        # Fill any remaining NaN values
+        data = data.fillna(method='ffill').fillna(method='bfill').fillna(0)
+            
         return data
 
     def prepare_scaled_features(self, data: pd.DataFrame) -> np.ndarray:
-        """Prepare scaled features for prediction"""
+        """Prepare scaled features for prediction with safety checks"""
         from sklearn.preprocessing import RobustScaler, MinMaxScaler
 
-        tech_columns = [
-            'RSI', 'MACD', 'SMA_20', '%K', '%D', 'ROC', 'MFI',
-            'BB_upper', 'BB_lower', 'ATR', 'OBV',
-            'Signal_Line', 'BB_middle', 'Volume_MA', 'Volume_Ratio'
-        ]
+        # Ensure we have all required features
+        all_features = (
+            self.feature_columns['technical'] + 
+            self.feature_columns['long_term'] + 
+            self.feature_columns['sentiment']
+        )
         
-        sent_columns = [
-            'raw_sentiment', 'sentiment_3d', 'sentiment_7d',
-            'sentiment_momentum', 'sentiment_volume', 
-            'sentiment_acceleration', 'sentiment_regime',
-            'sentiment_trend_strength', 
-            'sent_price_momentum', 'sentiment_trend',
-            'sentiment_rsi', 'sentiment_volatility'  # Adding these two
-        ]
-
-        tech_features = data[self.feature_columns['technical']].values
-    
-        # Long-term features
-        long_term_columns = [
-            'SMA_50', 'SMA_100', 'SMA_200', 
-            'MA_Cross_50_200', 'MA_Cross_20_50',
-            'ROC_20', 'ROC_60', 'ADX', 
-            'ATR_20', 'BB_Width',
-            'Volume_SMA_50', 'Volume_Trend'
-        ]
-        long_term_features = data[long_term_columns].values
+        # Add missing columns with default values
+        for column in all_features:
+            if column not in data.columns:
+                print(f"Adding missing column: {column}")
+                data[column] = 0.0
         
-        # Sentiment features
-        sent_features = data[self.feature_columns['sentiment']].values
+        # Select only the columns we need
+        data_selected = data[all_features].copy()
+        
+        # Fill any NaN values
+        data_selected = data_selected.fillna(0)
         
         # Scale features
-        tech_scaler = RobustScaler()
-        sent_scaler = MinMaxScaler(feature_range=(-1, 1))
-        
-        # Scale each feature set
-        X_tech = tech_scaler.fit_transform(tech_features)
-        X_long = tech_scaler.fit_transform(long_term_features)
-        X_sent = sent_scaler.fit_transform(sent_features)
-        
-        # Print feature counts for verification
-        print("\nFeature counts:")
-        print(f"Technical features: {X_tech.shape[1]}")
-        print(f"Long-term features: {X_long.shape[1]}")
-        print(f"Sentiment features: {X_sent.shape[1]}")
-        print(f"Total features: {X_tech.shape[1] + X_long.shape[1] + X_sent.shape[1]}")
-        
-        # Stack all features
-        return np.hstack([X_tech, X_long, X_sent])
+        try:
+            # Technical features
+            tech_features = data_selected[self.feature_columns['technical']].values
+            
+            # Long-term features
+            long_term_features = data_selected[self.feature_columns['long_term']].values
+            
+            # Sentiment features
+            sent_features = data_selected[self.feature_columns['sentiment']].values
+            
+            # Scale each feature set
+            tech_scaler = RobustScaler()
+            sent_scaler = MinMaxScaler(feature_range=(-1, 1))
+            
+            X_tech = tech_scaler.fit_transform(tech_features)
+            X_long = tech_scaler.fit_transform(long_term_features)
+            X_sent = sent_scaler.fit_transform(sent_features)
+            
+            # Print feature counts for verification
+            print("\nFeature counts:")
+            print(f"Technical features: {X_tech.shape[1]}")
+            print(f"Long-term features: {X_long.shape[1]}")
+            print(f"Sentiment features: {X_sent.shape[1]}")
+            print(f"Total features: {X_tech.shape[1] + X_long.shape[1] + X_sent.shape[1]}")
+            
+            # Stack all features
+            return np.hstack([X_tech, X_long, X_sent])
+            
+        except Exception as e:
+            print(f"Error in scaling features: {e}")
+            
+            # If scaling fails, use simple normalization
+            features = data_selected.values
+            features_mean = np.nanmean(features, axis=0)
+            features_std = np.nanstd(features, axis=0)
+            features_std = np.where(features_std == 0, 1, features_std)  # Avoid division by zero
+            
+            # Simple normalization
+            normalized_features = (features - features_mean) / features_std
+            
+            # Replace NaN values with zeros
+            normalized_features = np.nan_to_num(normalized_features)
+            
+            print(f"Using fallback normalization. Feature shape: {normalized_features.shape}")
+            return normalized_features
     
     def verify_all_features_present(self, data: pd.DataFrame) -> bool:
         """Verify all required features exist in data"""
@@ -487,30 +578,78 @@ class StockManager:
         return data
 
     def add_long_term_indicators(self, data: pd.DataFrame) -> pd.DataFrame:
-        """Add longer timeframe technical indicators"""
-        # Longer-term moving averages
-        data['SMA_50'] = data['Close'].rolling(window=50).mean()
-        data['SMA_100'] = data['Close'].rolling(window=100).mean()
-        data['SMA_200'] = data['Close'].rolling(window=200).mean()
+        """Add longer timeframe technical indicators with safety checks"""
+        data = data.copy()
+        
+        # Longer-term moving averages with safety
+        try:
+            data['SMA_50'] = data['Close'].rolling(window=min(50, len(data)-1), min_periods=1).mean()
+            data['SMA_100'] = data['Close'].rolling(window=min(100, len(data)-1), min_periods=1).mean()
+            data['SMA_200'] = data['Close'].rolling(window=min(200, len(data)-1), min_periods=1).mean()
+        except Exception as e:
+            print(f"Error calculating long-term SMAs: {e}")
+            data['SMA_50'] = data['Close']
+            data['SMA_100'] = data['Close']
+            data['SMA_200'] = data['Close']
+        
+        # Create SMA_20 if it doesn't exist (needed for crossover calculations)
+        if 'SMA_20' not in data.columns:
+            data['SMA_20'] = data['Close'].rolling(window=min(20, len(data)-1), min_periods=1).mean()
         
         # Moving average crossovers
-        data['MA_Cross_50_200'] = data['SMA_50'] - data['SMA_200']
-        data['MA_Cross_20_50'] = data['SMA_20'] - data['SMA_50']
+        try:
+            data['MA_Cross_50_200'] = data['SMA_50'] - data['SMA_200']
+            data['MA_Cross_20_50'] = data['SMA_20'] - data['SMA_50']
+        except Exception as e:
+            print(f"Error calculating MA crossovers: {e}")
+            data['MA_Cross_50_200'] = 0
+            data['MA_Cross_20_50'] = 0
         
-        # Longer-term momentum
-        data['ROC_20'] = data['Close'].pct_change(periods=20) * 100
-        data['ROC_60'] = data['Close'].pct_change(periods=60) * 100
+        # Longer-term momentum with safety
+        try:
+            data['ROC_20'] = data['Close'].pct_change(periods=min(20, len(data)-1)).fillna(0) * 100
+            data['ROC_60'] = data['Close'].pct_change(periods=min(60, len(data)-1)).fillna(0) * 100
+        except Exception as e:
+            print(f"Error calculating ROC: {e}")
+            data['ROC_20'] = 0
+            data['ROC_60'] = 0
         
-        # Trend strength indicators
-        data['ADX'] = self.calculate_adx(data)
+        # Trend strength indicators with safety
+        try:
+            data['ADX'] = self.calculate_adx(data)
+        except Exception as e:
+            print(f"Error calculating ADX: {e}")
+            data['ADX'] = 25  # Neutral value
         
-        # Volatility measures
-        data['ATR_20'] = self.calculate_atr(data, window=20)
-        data['BB_Width'] = (data['BB_upper'] - data['BB_lower']) / data['BB_middle']
+        # Volatility measures with safety
+        try:
+            data['ATR_20'] = self.calculate_atr(data, window=min(20, len(data)-1))
+        except Exception as e:
+            print(f"Error calculating ATR_20: {e}")
+            data['ATR_20'] = data['Close'] * 0.02  # Default 2% volatility
         
-        # Volume trends
-        data['Volume_SMA_50'] = data['Volume'].rolling(window=50).mean()
-        data['Volume_Trend'] = data['Volume'] / data['Volume_SMA_50']
+        # Bollinger Band width with safety
+        if all(col in data.columns for col in ['BB_upper', 'BB_lower', 'BB_middle']):
+            try:
+                data['BB_Width'] = (data['BB_upper'] - data['BB_lower']) / data['BB_middle']
+            except Exception as e:
+                print(f"Error calculating BB_Width: {e}")
+                data['BB_Width'] = 0.04  # Default 4% width
+        else:
+            print("BB columns missing, setting default BB_Width")
+            data['BB_Width'] = 0.04
+        
+        # Volume trends with safety
+        try:
+            data['Volume_SMA_50'] = data['Volume'].rolling(window=min(50, len(data)-1), min_periods=1).mean()
+            data['Volume_Trend'] = data['Volume'] / data['Volume_SMA_50'].replace(0, 1)
+        except Exception as e:
+            print(f"Error calculating Volume trends: {e}")
+            data['Volume_SMA_50'] = data['Volume']
+            data['Volume_Trend'] = 1.0
+        
+        # Fill any NaN values
+        data = data.fillna(method='ffill').fillna(method='bfill').fillna(0)
         
         return data
 

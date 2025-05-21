@@ -30,7 +30,7 @@ class PredictionSystem:
         try:
             if f'{symbol}_lstm' not in self.models:
                 self.load_models(symbol)
-                
+                    
             if sentiment_data:
                 print(f"Using cached sentiment for {symbol}")
                 data, sentiment = self.stock_manager.prepare_prediction_data(
@@ -44,20 +44,28 @@ class PredictionSystem:
             # Prepare features
             X = self.stock_manager.prepare_scaled_features(data)
             
+            # Adapt features to match expected model input size (39)
+            X = self._adapt_features(X, expected_size=39)
+            
             # Get real-time price
             real_time_price = self.stock_manager.get_real_time_price(symbol)
             if real_time_price:
                 current_price = real_time_price['price']
             else:
                 current_price = data['Close'].iloc[-1]  # Fallback to last close
-                
+                    
             predictions = {}
             all_preds = []
             
             # LSTM prediction
             if f'{symbol}_lstm' in self.models:
-                lstm_model = self.models[f'{symbol}_lstm'].cuda()
-                sequence = torch.FloatTensor(X[-window_size:]).unsqueeze(0).cuda()
+                lstm_model = self.models[f'{symbol}_lstm']
+                # Make sure we have enough data for the window
+                if len(X) < window_size:
+                    print(f"WARNING: Not enough data for window size {window_size}, using available data length {len(X)}")
+                    sequence = torch.FloatTensor(X).unsqueeze(0).cuda()
+                else:
+                    sequence = torch.FloatTensor(X[-window_size:]).unsqueeze(0).cuda()
                 
                 with torch.no_grad():
                     scaled_pred = lstm_model(sequence).cpu().item()
@@ -68,11 +76,14 @@ class PredictionSystem:
             # XGBoost prediction
             if f'{symbol}_xgb' in self.models:
                 xgb_model = self.models[f'{symbol}_xgb']
-                scaled_pred = xgb_model.predict(X[-1:])
+                # Adapt the input for XGBoost too
+                xgb_input = self._adapt_features(X[-1:], expected_size=39)
+                scaled_pred = xgb_model.predict(xgb_input)
                 xgb_price = current_price * (1 + scaled_pred[0]/100)
                 predictions['xgboost'] = xgb_price
                 all_preds.append(xgb_price)
             
+            # Rest of your method remains the same...
             if predictions:
                 # Dynamic weights based on recent performance
                 lstm_weight = 0.4
@@ -156,7 +167,7 @@ class PredictionSystem:
                     )
                 
             return predictions
-            
+                
         except Exception as e:
             print(f"Error in prediction: {str(e)}")
             raise e
@@ -222,16 +233,20 @@ class PredictionSystem:
                     self.scalers = pickle.load(f)
                 print("Successfully loaded scalers")
             
-            # Get feature dimensions
+            # Get feature dimensions and print debug info
             data, _ = self.stock_manager.prepare_prediction_data(symbol)
             X = self.stock_manager.prepare_scaled_features(data)
             input_size = X.shape[1]
+            print(f"DEBUG - Current data feature count: {input_size}")
+            
+            # Expected model input size based on model diagnostics
+            expected_input_size = 39  # From model diagnostics
             
             # Load LSTM with correct input size
             lstm_path = os.path.join(self.model_dir, f'{symbol}_lstm_best.pth')
             if os.path.exists(lstm_path):
                 lstm_model = EnhancedLSTM(
-                    input_size=input_size,
+                    input_size=expected_input_size,  # Use the expected size from diagnostics
                     hidden_size=256,
                     num_layers=3,
                     dropout=0.3
@@ -240,6 +255,7 @@ class PredictionSystem:
                 state_dict = torch.load(lstm_path, weights_only=True)
                 lstm_model.load_state_dict(state_dict)
                 lstm_model.eval()
+                lstm_model = lstm_model.cuda()  # Move to GPU
                 self.models[f'{symbol}_lstm'] = lstm_model
                 print("Successfully loaded LSTM model")
             
@@ -390,4 +406,24 @@ class PredictionSystem:
         mean_pred = np.mean(predictions)
         
         return (mean_pred - margin, mean_pred + margin)
+    
+    def _adapt_features(self, X: np.ndarray, expected_size: int = 39) -> np.ndarray:
+        """Adapt feature array to match the expected size of 39 for model compatibility"""
+        current_size = X.shape[1]
+        
+        if current_size == expected_size:
+            return X
+            
+        print(f"Adapting features from size {current_size} to {expected_size}")
+        
+        if current_size > expected_size:
+            # If we have too many features, select only the first expected_size
+            print(f"Too many features: {current_size}, truncating to {expected_size}")
+            return X[:, :expected_size]
+            
+        elif current_size < expected_size:
+            # If we have too few features, pad with zeros
+            print(f"Too few features: {current_size}, padding to {expected_size}")
+            padding = np.zeros((X.shape[0], expected_size - current_size))
+            return np.hstack([X, padding])
     
