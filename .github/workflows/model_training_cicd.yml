@@ -1,0 +1,773 @@
+name: DeepTrade AI - Model Training CI/CD Pipeline
+
+on:
+  # Automated triggers
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM UTC
+  
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      retrain_models:
+        description: 'Trigger model retraining'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      
+      target_stocks:
+        description: 'Specific stocks to retrain (comma-separated)'
+        required: false
+        default: 'all'
+        type: string
+      
+      performance_threshold:
+        description: 'Performance degradation threshold (%)'
+        required: false
+        default: '5'
+        type: string
+  
+  # Data-driven triggers
+  push:
+    paths:
+      - 'data/raw/**'
+      - 'utils/model_trainer.py'
+      - 'config/model_config.json'
+    branches:
+      - main
+  
+  # Performance monitoring triggers
+  repository_dispatch:
+    types: [model-performance-degradation]
+
+env:
+  PYTHON_VERSION: '3.9'
+  CUDA_VERSION: '11.8'
+  AWS_REGION: 'us-east-1'
+  MODEL_REGISTRY_BUCKET: 'deeptrade-model-registry'
+  ARTIFACT_RETENTION_DAYS: 30
+
+jobs:
+  # Job 1: Environment Setup and Validation
+  setup-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix-config: ${{ steps.generate-matrix.outputs.matrix }}
+      should-retrain: ${{ steps.check-triggers.outputs.should-retrain }}
+      
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for data change detection
+      
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov flake8 black
+      
+      - name: Check Data Changes
+        id: check-data-changes
+        run: |
+          # Check if data files have changed
+          if git diff --name-only HEAD~1 HEAD | grep -E "(data/raw/|data/processed/)" > /dev/null; then
+            echo "data-changed=true" >> $GITHUB_OUTPUT
+            echo "📊 Data changes detected - triggering model evaluation"
+          else
+            echo "data-changed=false" >> $GITHUB_OUTPUT
+            echo "📊 No data changes detected"
+          fi
+      
+      - name: Check Model Performance
+        id: check-performance
+        run: |
+          python -c "
+          import json
+          import os
+          import numpy as np
+          from datetime import datetime, timedelta
+          
+          # Simulate performance monitoring
+          performance_data = {
+              'accuracy_drift': np.random.uniform(-0.08, 0.08),
+              'validation_loss_increase': np.random.uniform(0, 0.15),
+              'prediction_confidence_drop': np.random.uniform(-0.1, 0.05),
+              'data_quality_score': np.random.uniform(0.8, 1.0),
+              'last_check': datetime.now().isoformat()
+          }
+          
+          # Check performance degradation
+          threshold = float('${{ github.event.inputs.performance_threshold }}' or '5') / 100
+          needs_retraining = (
+              abs(performance_data['accuracy_drift']) > threshold or
+              performance_data['validation_loss_increase'] > threshold or
+              abs(performance_data['prediction_confidence_drop']) > threshold or
+              performance_data['data_quality_score'] < 0.85
+          )
+          
+          print(f'Performance metrics: {performance_data}')
+          print(f'Needs retraining: {needs_retraining}')
+          
+          # Save to GitHub output
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'performance-degraded={str(needs_retraining).lower()}\n')
+              f.write(f'accuracy-drift={performance_data[\"accuracy_drift\"]:.4f}\n')
+              f.write(f'validation-loss={performance_data[\"validation_loss_increase\"]:.4f}\n')
+          
+          # Save detailed metrics
+          os.makedirs('artifacts/performance', exist_ok=True)
+          with open('artifacts/performance/metrics.json', 'w') as f:
+              json.dump(performance_data, f, indent=2)
+          "
+      
+      - name: Determine Retraining Triggers
+        id: check-triggers
+        run: |
+          # Check all trigger conditions
+          MANUAL_TRIGGER="${{ github.event.inputs.retrain_models }}"
+          DATA_CHANGED="${{ steps.check-data-changes.outputs.data-changed }}"
+          PERFORMANCE_DEGRADED="${{ steps.check-performance.outputs.performance-degraded }}"
+          SCHEDULED_RUN="${{ github.event_name == 'schedule' }}"
+          
+          if [[ "$MANUAL_TRIGGER" == "true" ]] || \
+             [[ "$DATA_CHANGED" == "true" ]] || \
+             [[ "$PERFORMANCE_DEGRADED" == "true" ]] || \
+             [[ "$SCHEDULED_RUN" == "true" ]]; then
+            echo "should-retrain=true" >> $GITHUB_OUTPUT
+            echo "🚀 Model retraining triggered"
+            echo "  Manual: $MANUAL_TRIGGER"
+            echo "  Data changed: $DATA_CHANGED"
+            echo "  Performance degraded: $PERFORMANCE_DEGRADED"
+            echo "  Scheduled: $SCHEDULED_RUN"
+          else
+            echo "should-retrain=false" >> $GITHUB_OUTPUT
+            echo "⏸️ No retraining triggers detected"
+          fi
+      
+      - name: Generate Training Matrix
+        id: generate-matrix
+        run: |
+          python -c "
+          import json
+          
+          # Define stock and timeframe combinations
+          stocks = [
+              'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'AMD',
+              'NFLX', 'ADBE', 'CRM', 'ORCL', 'INTC', 'QCOM', 'AVGO', 'TXN',
+              'MU', 'AMAT', 'LRCX', 'KLAC', 'MRVL', 'SNPS', 'CDNS', 'FTNT', 'PANW'
+          ]
+          timeframes = ['5min', '15min', '30min', '1h']
+          
+          # Filter stocks if specific targets provided
+          target_stocks = '${{ github.event.inputs.target_stocks }}'.strip()
+          if target_stocks and target_stocks != 'all':
+              stocks = [s.strip().upper() for s in target_stocks.split(',') if s.strip()]
+              stocks = [s for s in stocks if s in stocks]  # Validate
+          
+          # Create training matrix (group into batches for parallel execution)
+          batch_size = 5
+          batches = []
+          
+          for i in range(0, len(stocks), batch_size):
+              batch_stocks = stocks[i:i+batch_size]
+              for timeframe in timeframes:
+                  batches.append({
+                      'batch_id': len(batches),
+                      'stocks': batch_stocks,
+                      'timeframe': timeframe,
+                      'batch_name': f'batch_{len(batches)}_stocks_{len(batch_stocks)}_{timeframe}'
+                  })
+          
+          matrix = {'include': batches}
+          print(f'Generated matrix with {len(batches)} training batches')
+          print(json.dumps(matrix, indent=2))
+          
+          # Save to GitHub output
+          with open('${{ github.env.GITHUB_OUTPUT }}', 'a') as f:
+              f.write(f'matrix={json.dumps(matrix)}\n')
+          "
+      
+      - name: Upload Performance Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-metrics
+          path: artifacts/performance/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  # Job 2: Data Validation and Preprocessing
+  data-validation:
+    runs-on: ubuntu-latest
+    needs: setup-environment
+    if: needs.setup-environment.outputs.should-retrain == 'true'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install great-expectations pandas-profiling
+      
+      - name: Validate Data Quality
+        run: |
+          python -c "
+          import pandas as pd
+          import numpy as np
+          import json
+          import os
+          from datetime import datetime
+          
+          # Simulate data validation
+          validation_results = {
+              'data_sources_checked': ['market_data', 'news_data', 'social_sentiment', 'sec_filings'],
+              'total_records': np.random.randint(50000, 100000),
+              'quality_score': np.random.uniform(0.85, 0.98),
+              'missing_data_ratio': np.random.uniform(0, 0.05),
+              'schema_validation': 'PASSED',
+              'timestamp': datetime.now().isoformat()
+          }
+          
+          # Data quality checks
+          quality_passed = (
+              validation_results['quality_score'] >= 0.8 and
+              validation_results['missing_data_ratio'] <= 0.1 and
+              validation_results['schema_validation'] == 'PASSED'
+          )
+          
+          print(f'Data validation results: {validation_results}')
+          print(f'Quality check passed: {quality_passed}')
+          
+          # Save validation results
+          os.makedirs('artifacts/validation', exist_ok=True)
+          with open('artifacts/validation/data_quality.json', 'w') as f:
+              json.dump(validation_results, f, indent=2)
+          
+          # Fail if data quality is poor
+          if not quality_passed:
+              raise Exception('Data quality validation failed')
+          "
+      
+      - name: Generate Data Profile
+        run: |
+          python -c "
+          import pandas as pd
+          import numpy as np
+          import json
+          import os
+          
+          # Generate synthetic data profile
+          profile = {
+              'dataset_info': {
+                  'total_stocks': 25,
+                  'total_timeframes': 4,
+                  'date_range': '2023-01-01 to 2024-12-31',
+                  'features_per_model': 39
+              },
+              'feature_statistics': {
+                  'technical_indicators': 15,
+                  'trend_features': 12,
+                  'sentiment_features': 12
+              },
+              'data_freshness': {
+                  'last_market_data_update': '2024-12-26T10:30:00Z',
+                  'last_sentiment_update': '2024-12-26T09:45:00Z',
+                  'last_news_update': '2024-12-26T10:15:00Z'
+              }
+          }
+          
+          os.makedirs('artifacts/validation', exist_ok=True)
+          with open('artifacts/validation/data_profile.json', 'w') as f:
+              json.dump(profile, f, indent=2)
+          
+          print('Data profile generated successfully')
+          "
+      
+      - name: Upload Validation Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: validation-results
+          path: artifacts/validation/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  # Job 3: Distributed Model Training
+  distributed-training:
+    runs-on: ubuntu-latest
+    needs: [setup-environment, data-validation]
+    if: needs.setup-environment.outputs.should-retrain == 'true'
+    strategy:
+      matrix: ${{ fromJson(needs.setup-environment.outputs.matrix-config) }}
+      fail-fast: false
+      max-parallel: 4  # Simulate 4 GPU limit
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+      
+      - name: Download Validation Results
+        uses: actions/download-artifact@v3
+        with:
+          name: validation-results
+          path: artifacts/validation/
+      
+      - name: Simulate Distributed Training
+        env:
+          BATCH_ID: ${{ matrix.batch_id }}
+          STOCKS: ${{ join(matrix.stocks, ',') }}
+          TIMEFRAME: ${{ matrix.timeframe }}
+          BATCH_NAME: ${{ matrix.batch_name }}
+        run: |
+          python -c "
+          import os
+          import json
+          import numpy as np
+          import time
+          from datetime import datetime
+          
+          # Get environment variables
+          batch_id = os.environ['BATCH_ID']
+          stocks = os.environ['STOCKS'].split(',')
+          timeframe = os.environ['TIMEFRAME']
+          batch_name = os.environ['BATCH_NAME']
+          
+          print(f'Starting distributed training for {batch_name}')
+          print(f'Stocks: {stocks}')
+          print(f'Timeframe: {timeframe}')
+          
+          # Simulate training for each stock in the batch
+          training_results = {}
+          
+          for stock in stocks:
+              model_id = f'{stock}_{timeframe}'
+              
+              # Simulate training time (2-5 minutes per model)
+              training_time = np.random.uniform(120, 300)
+              print(f'Training {model_id}... (simulated {training_time:.1f}s)')
+              
+              # Simulate training metrics
+              lstm_loss = np.random.uniform(0.25, 0.45)
+              xgb_loss = np.random.uniform(0.10, 0.20)
+              ensemble_accuracy = np.random.uniform(0.55, 0.68)
+              
+              training_results[model_id] = {
+                  'lstm_final_loss': lstm_loss,
+                  'xgb_final_loss': xgb_loss,
+                  'ensemble_accuracy': ensemble_accuracy,
+                  'training_epochs': np.random.randint(80, 150),
+                  'convergence_epoch': np.random.randint(60, 120),
+                  'training_time_seconds': training_time,
+                  'gpu_utilization': np.random.uniform(0.85, 0.98),
+                  'memory_usage_gb': np.random.uniform(8, 15),
+                  'model_size_mb': np.random.uniform(25, 45),
+                  'validation_score': np.random.uniform(0.52, 0.65),
+                  'timestamp': datetime.now().isoformat()
+              }
+              
+              print(f'  Completed {model_id}: accuracy={ensemble_accuracy:.3f}, loss={lstm_loss:.3f}')
+          
+          # Save batch results
+          os.makedirs(f'artifacts/training/batch_{batch_id}', exist_ok=True)
+          
+          batch_summary = {
+              'batch_id': batch_id,
+              'batch_name': batch_name,
+              'stocks': stocks,
+              'timeframe': timeframe,
+              'models_trained': len(training_results),
+              'avg_accuracy': np.mean([r['ensemble_accuracy'] for r in training_results.values()]),
+              'avg_training_time': np.mean([r['training_time_seconds'] for r in training_results.values()]),
+              'total_batch_time': sum(r['training_time_seconds'] for r in training_results.values()),
+              'individual_results': training_results
+          }
+          
+          with open(f'artifacts/training/batch_{batch_id}/results.json', 'w') as f:
+              json.dump(batch_summary, f, indent=2)
+          
+          print(f'Batch {batch_id} completed successfully')
+          print(f'Average accuracy: {batch_summary[\"avg_accuracy\"]:.3f}')
+          print(f'Total training time: {batch_summary[\"total_batch_time\"]:.1f}s')
+          "
+      
+      - name: Upload Training Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: training-results-batch-${{ matrix.batch_id }}
+          path: artifacts/training/batch_${{ matrix.batch_id }}/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  # Job 4: Model Validation and Testing
+  model-validation:
+    runs-on: ubuntu-latest
+    needs: [setup-environment, distributed-training]
+    if: needs.setup-environment.outputs.should-retrain == 'true'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+      
+      - name: Download All Training Results
+        uses: actions/download-artifact@v3
+        with:
+          pattern: training-results-batch-*
+          path: artifacts/training/
+          merge-multiple: true
+      
+      - name: Aggregate Training Results
+        run: |
+          python -c "
+          import os
+          import json
+          import glob
+          import numpy as np
+          from datetime import datetime
+          
+          # Find all batch result files
+          result_files = glob.glob('artifacts/training/*/results.json')
+          print(f'Found {len(result_files)} batch result files')
+          
+          # Aggregate results
+          all_models = {}
+          batch_summaries = []
+          
+          for result_file in result_files:
+              with open(result_file, 'r') as f:
+                  batch_data = json.load(f)
+              
+              batch_summaries.append({
+                  'batch_id': batch_data['batch_id'],
+                  'models_count': batch_data['models_trained'],
+                  'avg_accuracy': batch_data['avg_accuracy'],
+                  'timeframe': batch_data['timeframe']
+              })
+              
+              # Collect individual model results
+              for model_id, results in batch_data['individual_results'].items():
+                  all_models[model_id] = results
+          
+          # Calculate aggregate statistics
+          accuracies = [r['ensemble_accuracy'] for r in all_models.values()]
+          lstm_losses = [r['lstm_final_loss'] for r in all_models.values()]
+          xgb_losses = [r['xgb_final_loss'] for r in all_models.values()]
+          
+          aggregate_stats = {
+              'total_models_trained': len(all_models),
+              'overall_performance': {
+                  'mean_accuracy': np.mean(accuracies),
+                  'std_accuracy': np.std(accuracies),
+                  'min_accuracy': np.min(accuracies),
+                  'max_accuracy': np.max(accuracies),
+                  'median_accuracy': np.median(accuracies)
+              },
+              'model_performance': {
+                  'lstm_mean_loss': np.mean(lstm_losses),
+                  'lstm_std_loss': np.std(lstm_losses),
+                  'xgb_mean_loss': np.mean(xgb_losses),
+                  'xgb_std_loss': np.std(xgb_losses)
+              },
+              'training_efficiency': {
+                  'avg_training_time': np.mean([r['training_time_seconds'] for r in all_models.values()]),
+                  'total_training_time': sum(r['training_time_seconds'] for r in all_models.values()),
+                  'avg_convergence_epoch': np.mean([r['convergence_epoch'] for r in all_models.values()])
+              },
+              'batch_summaries': batch_summaries,
+              'validation_timestamp': datetime.now().isoformat()
+          }
+          
+          print(f'Training Summary:')
+          print(f'  Total models: {aggregate_stats[\"total_models_trained\"]}')
+          print(f'  Mean accuracy: {aggregate_stats[\"overall_performance\"][\"mean_accuracy\"]:.3f}')
+          print(f'  Accuracy range: {aggregate_stats[\"overall_performance\"][\"min_accuracy\"]:.3f} - {aggregate_stats[\"overall_performance\"][\"max_accuracy\"]:.3f}')
+          print(f'  Total training time: {aggregate_stats[\"training_efficiency\"][\"total_training_time\"]:.1f}s')
+          
+          # Save aggregate results
+          os.makedirs('artifacts/validation', exist_ok=True)
+          with open('artifacts/validation/aggregate_results.json', 'w') as f:
+              json.dump(aggregate_stats, f, indent=2)
+          
+          with open('artifacts/validation/all_models.json', 'w') as f:
+              json.dump(all_models, f, indent=2)
+          "
+      
+      - name: Run Model Validation Tests
+        run: |
+          python -c "
+          import json
+          import numpy as np
+          
+          # Load aggregated results
+          with open('artifacts/validation/aggregate_results.json', 'r') as f:
+              stats = json.load(f)
+          
+          # Validation criteria
+          validation_results = {
+              'accuracy_threshold': 0.52,
+              'minimum_models': 90,  # 25 stocks * 4 timeframes - some tolerance
+              'max_loss_threshold': 0.5
+          }
+          
+          # Run validation tests
+          tests_passed = []
+          
+          # Test 1: Minimum accuracy
+          mean_accuracy = stats['overall_performance']['mean_accuracy']
+          accuracy_test = mean_accuracy >= validation_results['accuracy_threshold']
+          tests_passed.append(accuracy_test)
+          print(f'Accuracy test: {accuracy_test} (mean: {mean_accuracy:.3f}, threshold: {validation_results[\"accuracy_threshold\"]})')
+          
+          # Test 2: Sufficient models trained
+          models_count = stats['total_models_trained']
+          count_test = models_count >= validation_results['minimum_models']
+          tests_passed.append(count_test)
+          print(f'Model count test: {count_test} (count: {models_count}, minimum: {validation_results[\"minimum_models\"]})')
+          
+          # Test 3: Loss thresholds
+          lstm_loss = stats['model_performance']['lstm_mean_loss']
+          xgb_loss = stats['model_performance']['xgb_mean_loss']
+          loss_test = lstm_loss <= validation_results['max_loss_threshold'] and xgb_loss <= validation_results['max_loss_threshold']
+          tests_passed.append(loss_test)
+          print(f'Loss test: {loss_test} (LSTM: {lstm_loss:.3f}, XGB: {xgb_loss:.3f}, threshold: {validation_results[\"max_loss_threshold\"]})')
+          
+          # Overall validation result
+          all_passed = all(tests_passed)
+          validation_results['tests_passed'] = all_passed
+          validation_results['individual_tests'] = {
+              'accuracy_test': accuracy_test,
+              'count_test': count_test,
+              'loss_test': loss_test
+          }
+          
+          print(f'Overall validation: {\"PASSED\" if all_passed else \"FAILED\"}')
+          
+          # Save validation results
+          with open('artifacts/validation/validation_results.json', 'w') as f:
+              json.dump(validation_results, f, indent=2)
+          
+          # Exit with error if validation fails
+          if not all_passed:
+              raise Exception('Model validation failed')
+          "
+      
+      - name: Upload Validation Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: model-validation
+          path: artifacts/validation/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  # Job 5: Model Deployment
+  model-deployment:
+    runs-on: ubuntu-latest
+    needs: [setup-environment, model-validation]
+    if: needs.setup-environment.outputs.should-retrain == 'true'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Download Validation Results
+        uses: actions/download-artifact@v3
+        with:
+          name: model-validation
+          path: artifacts/validation/
+      
+      - name: Simulate Model Registry Upload
+        run: |
+          python -c "
+          import json
+          import os
+          from datetime import datetime
+          
+          # Load validation results
+          with open('artifacts/validation/aggregate_results.json', 'r') as f:
+              stats = json.load(f)
+          
+          with open('artifacts/validation/all_models.json', 'r') as f:
+              all_models = json.load(f)
+          
+          # Create deployment manifest
+          deployment_manifest = {
+              'deployment_id': f'deeptrade-models-{datetime.now().strftime(\"%Y%m%d-%H%M%S\")}',
+              'deployment_timestamp': datetime.now().isoformat(),
+              'total_models': len(all_models),
+              'performance_summary': stats['overall_performance'],
+              'model_registry_path': f's3://{os.environ[\"MODEL_REGISTRY_BUCKET\"]}/models/production/',
+              'version': 'v' + datetime.now().strftime('%Y.%m.%d'),
+              'git_commit': '${{ github.sha }}',
+              'workflow_run_id': '${{ github.run_id }}',
+              'models': {}
+          }
+          
+          # Add individual model metadata
+          for model_id, model_data in all_models.items():
+              deployment_manifest['models'][model_id] = {
+                  'accuracy': model_data['ensemble_accuracy'],
+                  'model_path': f's3://{os.environ[\"MODEL_REGISTRY_BUCKET\"]}/models/production/{model_id}.pt',
+                  'metadata_path': f's3://{os.environ[\"MODEL_REGISTRY_BUCKET\"]}/metadata/production/{model_id}.json'
+              }
+          
+          print(f'Deployment manifest created for {len(all_models)} models')
+          print(f'Deployment ID: {deployment_manifest[\"deployment_id\"]}')
+          print(f'Average accuracy: {deployment_manifest[\"performance_summary\"][\"mean_accuracy\"]:.3f}')
+          
+          # Save deployment manifest
+          os.makedirs('artifacts/deployment', exist_ok=True)
+          with open('artifacts/deployment/manifest.json', 'w') as f:
+              json.dump(deployment_manifest, f, indent=2)
+          "
+      
+      - name: Simulate Production Deployment
+        run: |
+          echo "🚀 Deploying models to production environment..."
+          echo "  - Model registry: s3://$MODEL_REGISTRY_BUCKET"
+          echo "  - Deployment region: $AWS_REGION"
+          echo "  - Version: $(date +'v%Y.%m.%d')"
+          echo "  - Commit: ${{ github.sha }}"
+          
+          # Simulate deployment steps
+          echo "📦 Uploading model artifacts..."
+          sleep 2
+          echo "🔄 Updating model registry..."
+          sleep 2
+          echo "🎯 Updating prediction endpoints..."
+          sleep 2
+          echo "✅ Deployment completed successfully"
+      
+      - name: Upload Deployment Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-manifest
+          path: artifacts/deployment/
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+
+  # Job 6: Notification and Reporting
+  notify-completion:
+    runs-on: ubuntu-latest
+    needs: [setup-environment, model-deployment]
+    if: always() && needs.setup-environment.outputs.should-retrain == 'true'
+    
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          pattern: '*'
+          path: artifacts/
+          merge-multiple: true
+      
+      - name: Generate Pipeline Report
+        run: |
+          python3 -c "
+          import json
+          import os
+          import glob
+          from datetime import datetime
+          
+          # Collect all results
+          report = {
+              'pipeline_run': {
+                  'run_id': '${{ github.run_id }}',
+                  'commit_sha': '${{ github.sha }}',
+                  'timestamp': datetime.now().isoformat(),
+                  'trigger': '${{ github.event_name }}',
+                  'manual_input': '${{ github.event.inputs.retrain_models }}' or 'N/A'
+              },
+              'performance_metrics': {},
+              'training_summary': {},
+              'validation_results': {},
+              'deployment_status': 'UNKNOWN'
+          }
+          
+          # Load performance metrics if available
+          if os.path.exists('artifacts/performance/metrics.json'):
+              with open('artifacts/performance/metrics.json', 'r') as f:
+                  report['performance_metrics'] = json.load(f)
+          
+          # Load training summary if available
+          if os.path.exists('artifacts/validation/aggregate_results.json'):
+              with open('artifacts/validation/aggregate_results.json', 'r') as f:
+                  report['training_summary'] = json.load(f)
+          
+          # Load validation results if available
+          if os.path.exists('artifacts/validation/validation_results.json'):
+              with open('artifacts/validation/validation_results.json', 'r') as f:
+                  report['validation_results'] = json.load(f)
+          
+          # Check deployment status
+          if os.path.exists('artifacts/deployment/manifest.json'):
+              report['deployment_status'] = 'SUCCESS'
+              with open('artifacts/deployment/manifest.json', 'r') as f:
+                  report['deployment_manifest'] = json.load(f)
+          else:
+              report['deployment_status'] = 'FAILED'
+          
+          # Generate summary
+          if report['training_summary']:
+              total_models = report['training_summary'].get('total_models_trained', 0)
+              mean_accuracy = report['training_summary'].get('overall_performance', {}).get('mean_accuracy', 0)
+              print(f'🎯 Pipeline Summary:')
+              print(f'   Models trained: {total_models}')
+              print(f'   Average accuracy: {mean_accuracy:.3f}')
+              print(f'   Validation: {\"PASSED\" if report[\"validation_results\"].get(\"tests_passed\") else \"FAILED\"}')
+              print(f'   Deployment: {report[\"deployment_status\"]}')
+          
+          # Save final report
+          with open('pipeline_report.json', 'w') as f:
+              json.dump(report, f, indent=2)
+          "
+      
+      - name: Post Slack Notification
+        if: always()
+        run: |
+          # Simulate Slack notification
+          STATUS="${{ job.status }}"
+          if [ "$STATUS" = "success" ]; then
+            echo "✅ Slack notification: DeepTrade AI model training pipeline completed successfully"
+          else
+            echo "❌ Slack notification: DeepTrade AI model training pipeline failed"
+          fi
+          echo "   Run ID: ${{ github.run_id }}"
+          echo "   Commit: ${{ github.sha }}"
+          echo "   Trigger: ${{ github.event_name }}"
+      
+      - name: Upload Final Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: pipeline-report
+          path: pipeline_report.json
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }} 

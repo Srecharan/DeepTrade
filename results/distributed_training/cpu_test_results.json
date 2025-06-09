@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-06-09T17:20:53.018615",
+  "device": "cpu",
+  "pytorch_version": "2.2.2",
+  "training_test": {
+    "status": "success",
+    "average_loss": 1.1623759269714355,
+    "device": "cpu",
+    "model_parameters": 5665
+  },
+  "simulation_test": {
+    "status": "success",
+    "models_trained": 4,
+    "individual_results": {
+      "AAPL_5min": {
+        "loss": 0.18202377508169304,
+        "accuracy": 0.5841199284837028,
+        "training_time": 24.86234076071588,
+        "device": "cpu"
+      },
+      "AAPL_15min": {
+        "loss": 0.20723134339147292,
+        "accuracy": 0.577638641930883,
+        "training_time": 16.704000929693358,
+        "device": "cpu"
+      },
+      "MSFT_5min": {
+        "loss": 0.25714999598640276,
+        "accuracy": 0.5551951866394967,
+        "training_time": 13.719306244008724,
+        "device": "cpu"
+      },
+      "MSFT_15min": {
+        "loss": 0.22756293652446433,
+        "accuracy": 0.661012068702389,
+        "training_time": 11.671867242223005,
+        "device": "cpu"
+      }
+    }
+  }
+}

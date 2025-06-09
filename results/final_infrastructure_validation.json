@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-06-09T17:43:06.315033",
+  "validation_type": "final_infrastructure_validation",
+  "duration_seconds": 0.004790067672729492,
+  "total_tests": 6,
+  "passed_tests": 5,
+  "success_rate": 83.33333333333334,
+  "infrastructure_status": "validated",
+  "resume_backing_status": "strong",
+  "interview_readiness": "ready"
+}

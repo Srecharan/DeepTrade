@@ -1,0 +1,88 @@
+{
+  "timestamp": "2025-06-09T17:20:59.883570",
+  "model_type": "finbert_simulation",
+  "sentiment_analysis_test": {
+    "status": "success",
+    "texts_processed": 5,
+    "results": [
+      {
+        "text_id": 0,
+        "text_preview": "Apple Inc. reported strong quarterly earnings beat...",
+        "sentiment": "positive",
+        "confidence": 0.6472646078214896,
+        "scores": {
+          "positive": 0.6472646078214896,
+          "negative": 0.1530026441727702,
+          "neutral": 0.19973274800574015
+        },
+        "processed_at": "2025-06-09T17:20:59.319082"
+      },
+      {
+        "text_id": 1,
+        "text_preview": "Tesla stock declined following production concerns...",
+        "sentiment": "positive",
+        "confidence": 0.7378700701093923,
+        "scores": {
+          "positive": 0.7378700701093923,
+          "negative": 0.15899035192421235,
+          "neutral": 0.10313957796639533
+        },
+        "processed_at": "2025-06-09T17:20:59.419251"
+      },
+      {
+        "text_id": 2,
+        "text_preview": "Microsoft announces major cloud services expansion...",
+        "sentiment": "positive",
+        "confidence": 0.4406113612533128,
+        "scores": {
+          "positive": 0.4406113612533128,
+          "negative": 0.14672781799117987,
+          "neutral": 0.41266082075550736
+        },
+        "processed_at": "2025-06-09T17:20:59.519852"
+      },
+      {
+        "text_id": 3,
+        "text_preview": "Amazon Web Services maintains market leadership in...",
+        "sentiment": "positive",
+        "confidence": 0.6083768125573836,
+        "scores": {
+          "positive": 0.6083768125573836,
+          "negative": 0.1243570672807946,
+          "neutral": 0.2672661201618218
+        },
+        "processed_at": "2025-06-09T17:20:59.620057"
+      },
+      {
+        "text_id": 4,
+        "text_preview": "NVIDIA's AI chip demand drives record quarterly pe...",
+        "sentiment": "positive",
+        "confidence": 0.7435119575151335,
+        "scores": {
+          "positive": 0.7435119575151335,
+          "negative": 0.11624816266778853,
+          "neutral": 0.14023987981707792
+        },
+        "processed_at": "2025-06-09T17:20:59.721533"
+      }
+    ]
+  },
+  "feature_generation_test": {
+    "status": "success",
+    "features_generated": 12,
+    "features": {
+      "avg_positive_sentiment": 0.542,
+      "avg_negative_sentiment": 0.26799999999999996,
+      "avg_neutral_sentiment": 0.19,
+      "sentiment_volatility": 0.286174771774173,
+      "sentiment_range": 0.7,
+      "positive_momentum": -0.06999999999999995,
+      "negative_momentum": 0.01999999999999999,
+      "sentiment_strength": 0.716,
+      "sentiment_confidence": 0.716,
+      "positive_ratio": 0.6,
+      "negative_ratio": 0.2,
+      "neutral_ratio": 0.2
+    }
+  }
+}

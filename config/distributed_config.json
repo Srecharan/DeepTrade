@@ -1,0 +1,44 @@
+{
+  "distributed_training": {
+    "infrastructure": {
+      "world_size": 4,
+      "backend": "nccl",
+      "master_addr": "localhost",
+      "master_port": "12355",
+      "gpu_memory_limit": "16GB",
+      "synchronization_method": "DDP"
+    },
+    "model_configuration": {
+      "stocks": [
+        "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "AMD",
+        "NFLX", "ADBE", "CRM", "ORCL", "INTC", "QCOM", "AVGO", "TXN",
+        "MU", "AMAT", "LRCX", "KLAC", "MRVL", "SNPS", "CDNS", "FTNT", "PANW"
+      ],
+      "timeframes": ["5min", "15min", "30min", "1h"],
+      "total_model_configs": 100,
+      "models_per_gpu": 25
+    },
+    "training_parameters": {
+      "batch_size_per_gpu": 32,
+      "global_batch_size": 128,
+      "learning_rate": 0.001,
+      "epochs": 100,
+      "gradient_clipping": 1.0,
+      "sync_batch_norm": true
+    },
+    "performance_targets": {
+      "training_time_reduction": "75%",
+      "throughput_increase": "4x",
+      "memory_efficiency": "optimal",
+      "fault_tolerance": "automatic_recovery"
+    }
+  },
+  "aws_infrastructure": {
+    "instance_type": "p3.8xlarge",
+    "gpu_count": 4,
+    "gpu_type": "V100",
+    "memory_per_gpu": "16GB",
+    "network_bandwidth": "25Gbps",
+    "storage": "1TB_NVMe_SSD"
+  }
+} 

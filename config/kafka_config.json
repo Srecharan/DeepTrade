@@ -1,0 +1,79 @@
+{
+  "kafka_cluster": {
+    "bootstrap_servers": ["localhost:9092"],
+    "client_id": "deeptrade-financial-ingestion",
+    "compression_type": "snappy",
+    "acks": "all",
+    "retries": 3,
+    "batch_size": 16384,
+    "linger_ms": 10,
+    "buffer_memory": 33554432
+  },
+  "topics": {
+    "financial-news": {
+      "partitions": 4,
+      "replication_factor": 1,
+      "retention_ms": 604800000,
+      "cleanup_policy": "delete",
+      "description": "Real-time financial news from NewsAPI"
+    },
+    "social-sentiment": {
+      "partitions": 4,
+      "replication_factor": 1,
+      "retention_ms": 604800000,
+      "cleanup_policy": "delete",
+      "description": "Social media sentiment from Reddit and Twitter"
+    },
+    "regulatory-filings": {
+      "partitions": 2,
+      "replication_factor": 1,
+      "retention_ms": 2592000000,
+      "cleanup_policy": "delete",
+      "description": "SEC filing notifications and updates"
+    },
+    "market-data": {
+      "partitions": 6,
+      "replication_factor": 1,
+      "retention_ms": 259200000,
+      "cleanup_policy": "delete",
+      "description": "Real-time market data and price updates"
+    }
+  },
+  "data_sources": {
+    "news_api": {
+      "enabled": true,
+      "api_endpoint": "https://newsapi.org/v2/everything",
+      "rate_limit_per_hour": 1000,
+      "search_keywords": ["earnings", "financial", "stock", "revenue"]
+    },
+    "reddit_api": {
+      "enabled": true,
+      "subreddits": ["wallstreetbets", "stocks", "investing", "SecurityAnalysis"],
+      "rate_limit_per_minute": 60,
+      "post_limit_per_subreddit": 20
+    },
+    "sec_edgar": {
+      "enabled": true,
+      "api_endpoint": "https://api.sec-api.io",
+      "filing_types": ["10-K", "10-Q", "8-K", "DEF 14A"],
+      "rate_limit_per_hour": 200
+    },
+    "market_data": {
+      "enabled": true,
+      "data_provider": "YahooFinance",
+      "update_frequency_seconds": 60,
+      "include_technical_indicators": true
+    }
+  },
+  "performance_metrics": {
+    "target_throughput": "9000+ events/day",
+    "peak_capacity": "1000+ events/hour",
+    "latency_target": "<1 second",
+    "availability_target": "99.9%"
+  },
+  "monitored_stocks": [
+    "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "AMD",
+    "NFLX", "ADBE", "CRM", "ORCL", "INTC", "QCOM", "AVGO", "TXN",
+    "MU", "AMAT", "LRCX", "KLAC", "MRVL", "SNPS", "CDNS", "FTNT", "PANW"
+  ]
+} 

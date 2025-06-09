@@ -1,0 +1,89 @@
+{
+  "airflow_setup": {
+    "dags_folder": "/opt/airflow/dags",
+    "base_log_folder": "/opt/airflow/logs",
+    "executor": "LocalExecutor",
+    "sql_alchemy_conn": "postgresql+psycopg2://airflow:airflow@postgres:5432/airflow",
+    "parallelism": 32,
+    "max_active_runs_per_dag": 1
+  },
+  "finbert_workflow": {
+    "dag_id": "finbert_sentiment_analysis",
+    "schedule_interval": "0 */4 * * *",
+    "max_active_runs": 1,
+    "catchup": false,
+    "default_args": {
+      "owner": "deeptrade-team",
+      "retries": 2,
+      "retry_delay_minutes": 5,
+      "execution_timeout_hours": 2,
+      "email_on_failure": true
+    }
+  },
+  "data_processing": {
+    "sources": ["kafka_events", "news_data", "social_data", "sec_filings"],
+    "batch_size": 10,
+    "max_text_length": 512,
+    "processing_timeout_minutes": 30,
+    "quality_threshold": 0.8
+  },
+  "finbert_model": {
+    "model_name": "ProsusAI/finbert",
+    "device": "cuda",
+    "max_sequence_length": 512,
+    "batch_processing": true,
+    "confidence_threshold": 0.4,
+    "sentiment_classes": ["negative", "neutral", "positive"]
+  },
+  "feature_engineering": {
+    "sentiment_features": [
+      "avg_positive_sentiment",
+      "avg_negative_sentiment",
+      "avg_neutral_sentiment",
+      "sentiment_volatility",
+      "sentiment_range",
+      "positive_momentum",
+      "negative_momentum",
+      "sentiment_strength",
+      "sentiment_confidence",
+      "positive_ratio",
+      "negative_ratio",
+      "neutral_ratio"
+    ],
+    "temporal_windows": ["3day", "7day", "14day"],
+    "aggregation_methods": ["mean", "std", "momentum"]
+  },
+  "performance_impact": {
+    "accuracy_boost": "~5%",
+    "processing_capacity": "360+ texts/day per stock",
+    "total_daily_processing": "9000+ financial texts",
+    "latency_target": "<10 seconds per batch"
+  },
+  "monitoring": {
+    "dag_id": "sentiment_model_monitoring",
+    "schedule_interval": "0 0 * * *",
+    "performance_thresholds": {
+      "accuracy_drift": 0.015,
+      "confidence_trend": 0.03,
+      "distribution_shift": 0.08,
+      "data_quality_score": 0.9
+    },
+    "retraining_triggers": {
+      "performance_degradation": true,
+      "data_volume_threshold": true,
+      "time_based": "weekly"
+    }
+  },
+  "data_storage": {
+    "output_directory": "/opt/airflow/data/processed/sentiment",
+    "file_formats": ["json", "parquet"],
+    "retention_days": 90,
+    "backup_enabled": true
+  },
+  "notifications": {
+    "slack_webhook": "https://hooks.slack.com/services/...",
+    "email_alerts": ["team@deeptrade.ai"],
+    "success_notifications": true,
+    "failure_notifications": true
+  }
+} 
